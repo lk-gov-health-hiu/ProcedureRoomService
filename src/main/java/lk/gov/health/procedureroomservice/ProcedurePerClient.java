@@ -8,12 +8,15 @@ package lk.gov.health.procedureroomservice;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlRootElement;
+import lk.gov.health.procedureservice.enums.ProcPerClientStates;
 
 /**
  *
@@ -36,7 +39,8 @@ public class ProcedurePerClient implements Serializable {
     private Long createdBy; 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date createdAt;
-    private String status;   
+    @Enumerated(EnumType.STRING)
+    private ProcPerClientStates status;   
     
 
     public Long getId() {
@@ -112,11 +116,11 @@ public class ProcedurePerClient implements Serializable {
         this.createdBy = createdBy;
     }
 
-    public String getStatus() {
+    public ProcPerClientStates getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ProcPerClientStates status) {
         this.status = status;
     }
 

@@ -7,11 +7,14 @@ package lk.gov.health.procedureroomservice;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.xml.bind.annotation.XmlRootElement;
+import lk.gov.health.procedureservice.enums.ObjectStatus;
 
 /**
  *
@@ -32,8 +35,8 @@ public class MedProcedure implements Serializable {
     @ManyToOne
     private ProcedureRoomType roomType;
     private String comment;
-    private String status;
-    
+    @Enumerated(EnumType.STRING)
+    private ObjectStatus status;    
 
     public Long getId() {
         return id;
@@ -108,11 +111,11 @@ public class MedProcedure implements Serializable {
         this.comment = comment;
     }
 
-    public String getStatus() {
+    public ObjectStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ObjectStatus status) {
         this.status = status;
     }
     

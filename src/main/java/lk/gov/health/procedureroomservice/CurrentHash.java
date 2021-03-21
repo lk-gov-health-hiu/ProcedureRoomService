@@ -10,25 +10,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author user
  */
 @Entity
-@XmlRootElement
-public class ProcedurePerInstitute implements Serializable {
+public class CurrentHash implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @ManyToOne
-    private Institute instituteId;
-    @ManyToOne
-    private MedProcedure procedure;
+    private String currHash;
+    private String owner; 
 
     public Long getId() {
         return id;
@@ -48,10 +43,10 @@ public class ProcedurePerInstitute implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof ProcedurePerInstitute)) {
+        if (!(object instanceof CurrentHash)) {
             return false;
         }
-        ProcedurePerInstitute other = (ProcedurePerInstitute) object;
+        CurrentHash other = (CurrentHash) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -60,23 +55,23 @@ public class ProcedurePerInstitute implements Serializable {
 
     @Override
     public String toString() {
-        return "lk.gov.health.procedureroomservice.ProcedurePerInstitute[ id=" + id + " ]";
+        return "lk.gov.health.procedureroomservice.CurrentHash[ id=" + id + " ]";
     }
 
-    public Institute getInstituteId() {
-        return instituteId;
+    public String getCurrHash() {
+        return currHash;
     }
 
-    public void setInstituteId(Institute instituteId) {
-        this.instituteId = instituteId;
+    public void setCurrHash(String currHash) {
+        this.currHash = currHash;
     }
 
-    public MedProcedure getProcedure() {
-        return procedure;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setProcedure(MedProcedure procedure) {
-        this.procedure = procedure;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
     
 }

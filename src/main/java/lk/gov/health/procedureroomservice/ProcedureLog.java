@@ -30,7 +30,8 @@ public class ProcedureLog implements Serializable {
     @ManyToOne
     private ProcedurePerClient procPerClientId;
     private String phn;
-    private Long instituteId;
+    @ManyToOne
+    private Institute instituteId;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date createdAt;
     private String activity;    
@@ -85,11 +86,11 @@ public class ProcedureLog implements Serializable {
         this.phn = phn;
     }
 
-    public Long getInstituteId() {
+    public Institute getInstituteId() {
         return instituteId;
     }
 
-    public void setInstituteId(Long instituteId) {
+    public void setInstituteId(Institute instituteId) {
         this.instituteId = instituteId;
     }
 

@@ -8,15 +8,11 @@ package lk.gov.health.procedureroomservice;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlRootElement;
-import lk.gov.health.procedureservice.enums.ProcPerClientStates;
 
 /**
  *
@@ -24,24 +20,20 @@ import lk.gov.health.procedureservice.enums.ProcPerClientStates;
  */
 @Entity
 @XmlRootElement
-public class ProcedurePerClient implements Serializable {
+public class ClientProcedure implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String phn;
-    @ManyToOne
-    private Institute instituteId;
-    @ManyToOne
-    private ProcedurePerInstitute procedureId;
-    @ManyToOne
-    private ProcedureRoom roomId;
+    private String instituteCode;
+    private String roomId;
+    private String procedureCode;
     private String createdBy;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date createdAt;
-    @Enumerated(EnumType.STRING)
-    private ProcPerClientStates status;
+    private String status;
 
     public Long getId() {
         return id;
@@ -61,10 +53,10 @@ public class ProcedurePerClient implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof ProcedurePerClient)) {
+        if (!(object instanceof ClientProcedure)) {
             return false;
         }
-        ProcedurePerClient other = (ProcedurePerClient) object;
+        ClientProcedure other = (ClientProcedure) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -73,7 +65,7 @@ public class ProcedurePerClient implements Serializable {
 
     @Override
     public String toString() {
-        return "lk.gov.health.procedureroomservice.ProcedurePerClient[ id=" + id + " ]";
+        return "lk.gov.health.procedureroomservice.ClientProcedure[ id=" + id + " ]";
     }
 
     public String getPhn() {
@@ -84,44 +76,28 @@ public class ProcedurePerClient implements Serializable {
         this.phn = phn;
     }
 
-    public Institute getInstituteId() {
-        return instituteId;
+    public String getInstituteCode() {
+        return instituteCode;
     }
 
-    public void setInstituteId(Institute instituteId) {
-        this.instituteId = instituteId;
+    public void setInstituteCode(String instituteCode) {
+        this.instituteCode = instituteCode;
     }
 
-    public ProcedureRoom getRoomId() {
+    public String getRoomId() {
         return roomId;
     }
 
-    public void setRoomId(ProcedureRoom roomId) {
+    public void setRoomId(String roomId) {
         this.roomId = roomId;
     }
 
-    public ProcPerClientStates getStatus() {
-        return status;
+    public String getProcedureCode() {
+        return procedureCode;
     }
 
-    public void setStatus(ProcPerClientStates status) {
-        this.status = status;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public ProcedurePerInstitute getProcedureId() {
-        return procedureId;
-    }
-
-    public void setProcedureId(ProcedurePerInstitute procedureId) {
-        this.procedureId = procedureId;
+    public void setProcedureCode(String procedureCode) {
+        this.procedureCode = procedureCode;
     }
 
     public String getCreatedBy() {
@@ -132,4 +108,19 @@ public class ProcedurePerClient implements Serializable {
         this.createdBy = createdBy;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    } 
 }

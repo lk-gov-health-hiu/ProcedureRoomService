@@ -32,7 +32,8 @@ public class ProcedureRoom implements Serializable {
     private String description;
     @ManyToOne
     private ProcedureRoomType type;
-    private Long instituteId;
+    @ManyToOne
+    private Institute instituteId;
     @Enumerated(EnumType.STRING)
     private ObjectStatus status;  
     
@@ -85,11 +86,11 @@ public class ProcedureRoom implements Serializable {
         this.type = type;
     }
 
-    public Long getInstituteId() {
+    public Institute getInstituteId() {
         return instituteId;
     }
 
-    public void setInstituteId(Long instituteId) {
+    public void setInstituteId(Institute instituteId) {
         this.instituteId = instituteId;
     }
 

@@ -126,6 +126,26 @@ public class ProcedureRoomFacadeREST extends AbstractFacade<ProcedureRoom> {
         }
         return ja_.toString();
     }
+    
+    @GET
+    @Path("/room_per_inst/{searchVal}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String findRoomsPerInstitute(@PathParam("searchVal") String searchVal) {        
+        JSONArray ja_ = new JSONArray();
+        
+        String jpql;
+        Map m = new HashMap();
+        jpql = "SELECT pr FROM ProcedureRoom pr WHERE upper(pr.roomId) = :searchVal";
+        
+        m.put("searchVal", "%" + searchVal.toUpperCase() + "%");
+        
+        List<ProcedureRoom> procRoomList = super.findByJpql(jpql, m);
+        
+        for (ProcedureRoom procRoom : procRoomList) {
+            ja_.add(getJSONObject(procRoom));
+        }
+        return ja_.toString();
+    }
 
     @Override
     protected EntityManager getEntityManager() {
@@ -159,8 +179,8 @@ public class ProcedureRoomFacadeREST extends AbstractFacade<ProcedureRoom> {
         tempObj.put("id", obj.getId());
         tempObj.put("code", obj.getCode());
         tempObj.put("hin", obj.getHin());
-        tempObj.put("longitude", obj.getLongitude());
-        tempObj.put("latitude", obj.getLatitude());
+        tempObj.put("institute_type_db", obj.getIntituteTypeDb());
+        tempObj.put("institute_type", obj.getIntituteType());
         tempObj.put("address", obj.getAddress());
         tempObj.put("provinceId", obj.getProvinceId());
         tempObj.put("districtId", obj.getDistrictId());

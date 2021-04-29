@@ -32,11 +32,9 @@ public class MedProcedure implements Serializable {
     private String description;
     @ManyToOne
     private ProcedureType procType;
-    @ManyToOne
-    private ProcedureRoomType roomType;
     private String comment;
     @Enumerated(EnumType.STRING)
-    private ObjectStatus status;    
+    private ObjectStatus status;
 
     public Long getId() {
         return id;
@@ -95,14 +93,6 @@ public class MedProcedure implements Serializable {
         this.procType = procType;
     }
 
-    public ProcedureRoomType getRoomType() {
-        return roomType;
-    }
-
-    public void setRoomType(ProcedureRoomType roomType) {
-        this.roomType = roomType;
-    }
-
     public String getComment() {
         return comment;
     }
@@ -118,5 +108,5 @@ public class MedProcedure implements Serializable {
     public void setStatus(ObjectStatus status) {
         this.status = status;
     }
-    
+
 }

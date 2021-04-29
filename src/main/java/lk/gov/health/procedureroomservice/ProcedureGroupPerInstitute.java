@@ -6,14 +6,12 @@
 package lk.gov.health.procedureroomservice;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 /**
  *
@@ -21,30 +19,16 @@ import org.json.simple.JSONObject;
  */
 @Entity
 @XmlRootElement
-public class CurrentHash implements Serializable {
+public class ProcedureGroupPerInstitute implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String currHash;
-    private String owner; 
-    
-    public ArrayList<CurrentHash> getObjectList(JSONArray ja_) {
-        ArrayList<CurrentHash> ObjectList = new ArrayList<>();
-
-        for (int i = 0; i < ja_.size(); i++) {
-            ObjectList.add(new CurrentHash().getObject((JSONObject) ja_.get(i)));
-        }
-        return ObjectList;
-    }
-
-    public CurrentHash getObject(JSONObject jo_) {
-        this.setId(jo_.containsKey("id") ? Long.parseLong(jo_.get("id").toString()) : null);
-        this.setCurrHash(jo_.containsKey("currHash") ? jo_.get("currHash").toString() : null);
-        this.setOwner(jo_.containsKey("owner") ? jo_.get("owner").toString() : null);        
-        return this;
-    }
+    @ManyToOne
+    private Institute institute;
+    @ManyToOne
+    private ProcedureGroup procedureGroup;
 
     public Long getId() {
         return id;
@@ -64,10 +48,10 @@ public class CurrentHash implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof CurrentHash)) {
+        if (!(object instanceof ProcedureGroupPerInstitute)) {
             return false;
         }
-        CurrentHash other = (CurrentHash) object;
+        ProcedureGroupPerInstitute other = (ProcedureGroupPerInstitute) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -76,23 +60,23 @@ public class CurrentHash implements Serializable {
 
     @Override
     public String toString() {
-        return "lk.gov.health.procedureroomservice.CurrentHash[ id=" + id + " ]";
+        return "lk.gov.health.procedureroomservice.ProcedureGroupPerInstitute[ id=" + id + " ]";
     }
 
-    public String getCurrHash() {
-        return currHash;
+    public Institute getInstitute() {
+        return institute;
     }
 
-    public void setCurrHash(String currHash) {
-        this.currHash = currHash;
+    public void setInstitute(Institute institute) {
+        this.institute = institute;
     }
 
-    public String getOwner() {
-        return owner;
+    public ProcedureGroup getProcedureGroup() {
+        return procedureGroup;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
+    public void setProcedureGroup(ProcedureGroup procedureGroup) {
+        this.procedureGroup = procedureGroup;
     }
     
 }

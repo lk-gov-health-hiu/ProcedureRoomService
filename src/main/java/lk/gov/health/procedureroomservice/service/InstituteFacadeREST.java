@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
@@ -29,16 +29,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import lk.gov.health.procedureroomservice.CurrentHash;
 import lk.gov.health.procedureroomservice.Institute;
-import lk.gov.health.procedureservice.serviceutils.CurrentHashFacade;
+import lk.gov.health.procedureroomservice.bean.CurrentHashCtrl;
+import lk.gov.health.procedureroomservice.bean.InstitutionCtrl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
  * @author user
  */
-@Stateless
+@Dependent
 @Path("lk.gov.health.procedureroomservice.institute")
 public class InstituteFacadeREST extends AbstractFacade<Institute> {
 
@@ -48,9 +50,12 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     public InstituteFacadeREST() {
         super(Institute.class);
     }
-    
-    @EJB
-    private CurrentHashFacade currHash;
+
+    @Inject
+    InstitutionCtrl institutionCtrl;
+
+    @Inject
+    CurrentHashCtrl currHashCtrl;
 
     @POST
     @Override
@@ -95,6 +100,45 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     }
 
     @GET
+    @Path("/get_procedure_rooms/{user_institute}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public String getInstitutionsRooms(@PathParam("user_institute") String userInstituteCode) {
+        JSONArray ja_ = new JSONArray();
+        Sync_Institutes();
+
+        if (userInstituteCode.equals("NO_FILTER")) {
+            for (Institute institute : Get_Procedure_Rooms()) {
+                ja_.add(getJSONObject(institute));
+            }
+        } else {
+            for (Institute institute : Get_Procedure_Rooms()) {
+                if (Is_Procedure_Room_Child(userInstituteCode, institute)) {
+                    ja_.add(getJSONObject(institute));
+                }
+            }
+        }
+        return ja_.toString();
+    }
+
+    @GET
+    @Path("is_exists/{ins_code}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public String isExists(@PathParam("ins_code") String userInstituteCode) {
+        JSONArray ja_ = new JSONArray();
+
+        for (Institute institute : Get_Procedure_Rooms()) {
+            if (userInstituteCode == null) {
+                ja_.add(getJSONObject(institute));
+            } else {
+                if (Is_Procedure_Room_Child(userInstituteCode, institute)) {
+                    ja_.add(getJSONObject(institute));
+                }
+            }
+        }
+        return ja_.toString();
+    }
+
+    @GET
     @Path("{from}/{to}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<Institute> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
@@ -115,16 +159,15 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
 
     private JSONObject getJSONObject(Institute institute) {
         JSONObject jo_ = new JSONObject();
-
         jo_.put("id", institute.getId());
         jo_.put("code", institute.getCode());
         jo_.put("name", institute.getName());
         jo_.put("hin", institute.getHin());
-        jo_.put("longitude", institute.getLongitude());
-        jo_.put("latitude", institute.getLatitude());
         jo_.put("address", institute.getAddress());
         jo_.put("provinceId", institute.getProvinceId());
         jo_.put("districtId", institute.getDistrictId());
+        jo_.put("childInstitutes", institute.getChildInstitutes());
+        jo_.put("editedAt", institute.getEditedAt().toString());
 
         return jo_;
     }
@@ -134,14 +177,13 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     @Produces(MediaType.APPLICATION_JSON)
     public String findFilteredList(@PathParam("searchVal") String searchVal) {
         JSONArray ja_ = new JSONArray();
-        
-        if(!Is_Sync()){
-            Sync_Institutes();
-            CurrentHash hashObj = currHash.findByField("owner", "INSTITUTE");            
-            hashObj.setCurrHash(this.Get_Institute_Hash());            
-            currHash.edit(hashObj);           
-        }
-        
+
+//        if (!Is_Sync()) {
+//            Sync_Institutes();
+//            CurrentHash hashObj = currHash.findByField("owner", "INSTITUTE");
+//            hashObj.setCurrHash(this.Get_Institute_Hash());
+//            currHash.edit(hashObj);
+//        }
         String jpql;
         Map m = new HashMap();
         jpql = "SELECT i FROM Institute i WHERE upper(i.code) like :searchVal";
@@ -156,50 +198,89 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     }
 
     public void Sync_Institutes() {
-        ArrayList<Institute> items;
-        Institute selected = new Institute();
-        try {
-            Client client = Client.create();
-            WebResource webResource1 = client.resource("http://localhost:8080/ProcedureRoomService/resources/lk.gov.health.procedureroomservice.institute");
-            ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
-            String outpt = cr.getEntity(String.class);
-            items = selected.getObjectList((JSONArray) new JSONParser().parse(outpt));
+        if (!Is_Sync()) {
+            ArrayList<Institute> items;
+            String mainAppUrl = "http://localhost:8080/chims/data?name=";
+            try {
+                Client client = Client.create();
+                WebResource webResource1 = client.resource(mainAppUrl + "get_module_institutes_list");
+                ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
+                String outpt = cr.getEntity(String.class);
+                JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);
+                items = institutionCtrl.getSelected().getObjectList((JSONArray) jo_.get("data"));
 
-            for (Institute inst : items) {
-                inst.setId(null);                
-                super.create(inst);
+                for (Institute inst : items) {
+                    if (inst.getCode() != null && !inst.getCode().equals("")) {
+                        if (isInstituteExists(inst.getCode())) {
+                            if (checkInstChanged(inst)) {
+                                inst.setId(getInstitute(inst.getCode()).getId());
+                                institutionCtrl.getInsFacede().edit(inst);
+                            }
+                        } else {
+                            institutionCtrl.getInsFacede().create(inst);
+                        }
+                    }
+                }
+            } catch (org.json.simple.parser.ParseException ex) {
+                Logger.getLogger(InstitutionCtrl.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (org.json.simple.parser.ParseException ex) {
-            Logger.getLogger(InstituteFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public boolean Is_Sync() {        
-        return Get_Current_Hash().getCurrHash().equals(this.Get_Institute_Hash());
+    public boolean checkInstChanged(Institute inst) {
+        return (getInstitute(inst.getCode()).getEditedAt() != inst.getEditedAt());
     }
-    
-    private CurrentHash Get_Current_Hash(){
-        HashMap<String,Object> p_ = new HashMap<>();
-        String jpql_ = "SELECT h FROM CurrentHash h WHERE h.owner = ?";
-        p_.put("owner", "INSTITITUE");
-        return (CurrentHash) this.currHash.findByJpql(jpql_, p_);
+
+    public boolean isInstituteExists(String insCode) {
+        return getInstitute(insCode) != null;
+    }
+
+    public Institute getInstitute(String insCode) {
+        HashMap<String, Object> p_ = new HashMap<>();
+        String jpql_ = "SELECT i FROM Institute i WHERE i.code = :insCode";
+        p_.put("insCode", insCode);
+
+        return super.findFirstByJpql(jpql_, p_);
+    }
+
+    public boolean Is_Sync() {
+        return (institutionCtrl.getLocalHash() != null && this.Get_Institute_Hash() != null) ? institutionCtrl.getLocalHash().equals(this.Get_Institute_Hash()) : false;
     }
 
     public String Get_Institute_Hash() {
+        ArrayList<CurrentHash> items;
         Client client = Client.create();
-        WebResource webResource1 = client.resource("http://localhost:8080/ProcedureRoomService/resources/lk.gov.health.procedureroomservice.institute");
+        WebResource webResource1 = client.resource("http://localhost:8080/chims/data?name=get_value_list_hash");
         ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
-        String output = cr.getEntity(String.class);
-        
-        return output;
+        String outpt = cr.getEntity(String.class);
+        JSONObject jo_;
+        try {
+            jo_ = (JSONObject) new JSONParser().parse(outpt);
+            items = currHashCtrl.getSelected().getObjectList((JSONArray) jo_.get("data"));
+
+            for (CurrentHash ch : items) {
+                if (ch.getOwner().equals("INSTITUTE")) {
+                    return ch.getCurrHash();
+                }
+            }
+        } catch (ParseException ex) {
+            Logger.getLogger(InstituteFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
-    public CurrentHashFacade getCurrHash() {
-        return currHash;
+    public List<Institute> Get_Procedure_Rooms() {
+        HashMap<String, Object> p_ = new HashMap<>();
+        String jpql_ = "SELECT i FROM Institute i WHERE i.intituteTypeDb = :intituteTypeDb";
+        p_.put("intituteTypeDb", "Procedure_Room");
+
+        return super.findByJpql(jpql_, p_);
     }
 
-    public void setCurrHash(CurrentHashFacade currHash) {
-        this.currHash = currHash;
+    public boolean Is_Procedure_Room_Child(String insCode, Institute institute) {
+        HashMap<String, Object> p_ = new HashMap<>();
+        String jpql_ = "SELECT i FROM Institute i WHERE i.code = :insCode AND i.childInstitutes LIKE '%" + institute.getCode() + "%'";
+        p_.put("insCode", insCode);
+        return super.findFirstByJpql(jpql_, p_) != null;
     }
-
 }

@@ -119,7 +119,6 @@ public class MedProcedureFacadeREST extends AbstractFacade<MedProcedure> {
         jo_.put("comment", mp_.getComment());
         jo_.put("procId", mp_.getProcId());
         jo_.put("description", mp_.getDescription());
-        jo_.put("roomType", getRoomTypeObjct(mp_.getRoomType()));
         jo_.put("procType", getProcTypeObjct(mp_.getProcType()));
         jo_.put("status", mp_.getStatus().toString());
 

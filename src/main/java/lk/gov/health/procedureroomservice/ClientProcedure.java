@@ -27,7 +27,6 @@ public class ClientProcedure implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String phn;
-    private String instituteCode;
     private String roomId;
     private String procedureCode;
     private String createdBy;
@@ -74,16 +73,8 @@ public class ClientProcedure implements Serializable {
 
     public void setPhn(String phn) {
         this.phn = phn;
-    }
-
-    public String getInstituteCode() {
-        return instituteCode;
-    }
-
-    public void setInstituteCode(String instituteCode) {
-        this.instituteCode = instituteCode;
-    }
-
+    }    
+    
     public String getRoomId() {
         return roomId;
     }

@@ -20,7 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import lk.gov.health.procedureroomservice.ProcedureGroup;
+import lk.gov.health.procedureroomservice.CurrentHash;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -29,28 +29,27 @@ import org.json.simple.JSONObject;
  * @author user
  */
 @Stateless
-@Path("lk.gov.health.procedureroomservice.proceduregroup")
-public class ProcedureGroupFacadeREST extends AbstractFacade<ProcedureGroup> {
+@Path("lk.gov.health.procedureroomservice.currenthash")
+public class CurrentHashFacadeREST extends AbstractFacade<CurrentHash> {
 
     @PersistenceContext(unitName = "hmisPU")
     private EntityManager em;
 
-    public ProcedureGroupFacadeREST() {
-        super(ProcedureGroup.class);
+    public CurrentHashFacadeREST() {
+        super(CurrentHash.class);
     }
 
     @POST
     @Override
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public void create(ProcedureGroup entity) {
-        entity.setId(null);  
+    public void create(CurrentHash entity) {
         super.create(entity);
     }
 
     @PUT
     @Path("{id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public void edit(@PathParam("id") Long id, ProcedureGroup entity) {
+    public void edit(@PathParam("id") Long id, CurrentHash entity) {
         super.edit(entity);
     }
 
@@ -63,37 +62,22 @@ public class ProcedureGroupFacadeREST extends AbstractFacade<ProcedureGroup> {
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public String find(@PathParam("id") Long id) {
-        return getJSONObject(super.find(id)).toString();
+    public CurrentHash find(@PathParam("id") Long id) {
+        return super.find(id);
     }
 
     @GET
+    @Override
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public String getdAll() {
-        JSONArray ja_ = new JSONArray();
-
-        List<ProcedureGroup> procGroupList;
-        procGroupList = super.findAll();
-
-        for (ProcedureGroup procType : procGroupList) {
-            ja_.add(getJSONObject(procType));
-    }
-        return ja_.toString(); 
+    public List<CurrentHash> findAll() {
+        return super.findAll();
     }
 
     @GET
     @Path("{from}/{to}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public String findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
-        JSONArray ja_ = new JSONArray();
-
-        List<ProcedureGroup> procGroupList;
-        procGroupList = super.findRange(new int[]{from, to});
-
-        for (ProcedureGroup procGroup : procGroupList) {
-            ja_.add(getJSONObject(procGroup));
-    }
-        return ja_.toString();
+    public List<CurrentHash> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
+        return super.findRange(new int[]{from, to});
     }
 
     @GET
@@ -109,32 +93,28 @@ public class ProcedureGroupFacadeREST extends AbstractFacade<ProcedureGroup> {
     }
     
     @GET
-    @Path("/filer_list/{searchVal}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String findFilteredList(@PathParam("searchVal") String searchVal) {
+    @Path("/find_by_owner/{owner}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public String findByOwner(@PathParam("owner") String owner) {
         JSONArray ja_ = new JSONArray();
-
         String jpql;
         Map m = new HashMap();
-        jpql = "SELECT pg FROM ProcedureGroup pg WHERE upper(pg.procGroup) like :searchVal";
+        
+        jpql = "SELECT h FROM CurrentHash h WHERE h.owner = :owner";
 
-        m.put("searchVal", "%" + searchVal.toUpperCase() + "%");
-
-        List<ProcedureGroup> groupList = super.findByJpql(jpql, m);
-
-        for (ProcedureGroup mp_ : groupList) {
-            ja_.add(getJSONObject(mp_));
+        m.put("owner", owner);
+        List<CurrentHash> groupItems = super.findByJpql(jpql, m);
+        for (CurrentHash h : groupItems) {
+            ja_.add(getJSONObject(h));
         }
         return ja_.toString();
     }
     
-    private JSONObject getJSONObject(ProcedureGroup procGroup) {
+    private JSONObject getJSONObject(CurrentHash gi) {
         JSONObject jo_ = new JSONObject();
-
-        jo_.put("id", procGroup.getId());
-        jo_.put("procGroup", procGroup.getProcGroup());
-        jo_.put("description", procGroup.getDescription());
-
+        jo_.put("id", gi.getId());
+        jo_.put("currHash", gi.getCurrHash());
+        jo_.put("owner", gi.getOwner());
         return jo_;
-    }    
+    }   
 }

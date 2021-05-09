@@ -27,9 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import lk.gov.health.procedureroomservice.CurrentHash;
 import lk.gov.health.procedureroomservice.Institute;
-import lk.gov.health.procedureroomservice.bean.CurrentHashCtrl;
 import lk.gov.health.procedureroomservice.bean.InstitutionCtrl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -52,10 +50,7 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     }
 
     @Inject
-    InstitutionCtrl institutionCtrl;
-
-    @Inject
-    CurrentHashCtrl currHashCtrl;
+    InstitutionCtrl institutionCtrl;   
 
     @POST
     @Override
@@ -203,7 +198,7 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
             String mainAppUrl = "http://localhost:8080/chims/data?name=";
             try {
                 Client client = Client.create();
-                WebResource webResource1 = client.resource(mainAppUrl + "get_module_institutes_list");
+                WebResource webResource1 = client.resource(mainAppUrl + "get_institutes_list");
                 ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
                 String outpt = cr.getEntity(String.class);
                 JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);
@@ -244,25 +239,18 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     }
 
     public boolean Is_Sync() {
-        return (institutionCtrl.getLocalHash() != null && this.Get_Institute_Hash() != null) ? institutionCtrl.getLocalHash().equals(this.Get_Institute_Hash()) : false;
+        return (institutionCtrl.getLocalInstitutionHash() != null && this.Get_Institute_Hash() != null) ? institutionCtrl.getLocalInstitutionHash().equals(this.Get_Institute_Hash()) : false;
     }
 
     public String Get_Institute_Hash() {
-        ArrayList<CurrentHash> items;
         Client client = Client.create();
-        WebResource webResource1 = client.resource("http://localhost:8080/chims/data?name=get_value_list_hash");
+        WebResource webResource1 = client.resource("http://localhost:8080/chims/data?name=get_institutes_list_hash");
         ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
         String outpt = cr.getEntity(String.class);
         JSONObject jo_;
         try {
             jo_ = (JSONObject) new JSONParser().parse(outpt);
-            items = currHashCtrl.getSelected().getObjectList((JSONArray) jo_.get("data"));
-
-            for (CurrentHash ch : items) {
-                if (ch.getOwner().equals("INSTITUTE")) {
-                    return ch.getCurrHash();
-                }
-            }
+            return jo_.get("data").toString();           
         } catch (ParseException ex) {
             Logger.getLogger(InstituteFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
         }

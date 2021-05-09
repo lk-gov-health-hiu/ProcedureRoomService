@@ -23,7 +23,6 @@ import javax.ws.rs.core.MediaType;
 import lk.gov.health.procedureroomservice.Institute;
 import lk.gov.health.procedureroomservice.MedProcedure;
 import lk.gov.health.procedureroomservice.ProcedurePerInstitute;
-import lk.gov.health.procedureroomservice.ProcedureRoomType;
 import lk.gov.health.procedureroomservice.ProcedureType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -106,7 +105,7 @@ public class ProcedurePerInstituteFacadeREST extends AbstractFacade<ProcedurePer
 
         String jpql;
         Map m = new HashMap();
-        jpql = "SELECT pi FROM ProcedurePerInstitute pi WHERE pi.institute = :instVal AND upper(pi.procedure) like :searchVal";
+        jpql = "SELECT pi FROM ProcedurePerInstitute pi WHERE pi.instituteId.code = :instVal AND upper(pi.procedure.procId) like :searchVal";
 
         m.put("searchVal", "%" + searchVal.toUpperCase() + "%");
         m.put("instVal", instVal);
@@ -150,14 +149,6 @@ public class ProcedurePerInstituteFacadeREST extends AbstractFacade<ProcedurePer
         jo_.put("description", mp_.getDescription());
         jo_.put("procType", getProcTypeObjct(mp_.getProcType()));
         return jo_;
-    }
-
-    public JSONObject getRoomTypeObjct(ProcedureRoomType obj) {
-        JSONObject tempObj = new JSONObject();
-        tempObj.put("id", obj.getId());
-        tempObj.put("typeId", obj.getTypeId());
-        tempObj.put("description", obj.getDescription());
-        return tempObj;
     }
 
     public JSONObject getProcTypeObjct(ProcedureType obj) {

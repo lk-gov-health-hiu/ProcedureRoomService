@@ -86,7 +86,6 @@ public class GroupItemFacadeREST extends AbstractFacade<GroupItem> {
         String jpql;
         Map m = new HashMap();
         jpql = "SELECT gi FROM GroupItem gi WHERE gi.procGroup.procGroup = :procGroup";
-        System.out.println("pppppppppppppppp -->"+groupId);
         m.put("procGroup", groupId);
         List<GroupItem> groupItems = super.findByJpql(jpql, m);
         for (GroupItem i : groupItems) {

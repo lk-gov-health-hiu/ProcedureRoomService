@@ -32,12 +32,11 @@ public class UserManagementREST {
             @QueryParam("Institution") String institution,
             @QueryParam("UserID") String UserId) {
 
-        if (apiKey != null && !apiKey.trim().equals("") && apiKey.trim().equals("EF16A5D4EF8AA6AA0580AF1390CF0600")) {            
-            return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/index.xhtml?User_Name=" + userName + "&User_Role="+userRole+"&Privileges=" + privilege + "&UserID=" + UserId + "&Institution=" + institution + "&API_KEY=" + apiKey).build();
+        if (apiKey != null && !apiKey.trim().equals("") && apiKey.trim().equals("EF16A5D4EF8AA6AA0580AF1390CF0600")) {
+            return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/index.xhtml?User_Name=" + userName + "&User_Role=" + userRole + "&Privileges=" + privilege + "&UserID=" + UserId + "&Institution=" + institution + "&API_KEY=" + apiKey).build();
         } else {
-          return Response.status(Response.Status.CONFLICT).entity("Authorization issue, Please contact your system admin.").build();
+            return Response.status(Response.Status.CONFLICT).entity("Authorization issue, Please contact your system admin.").build();
         }
-        
     }
 
     private JSONObject errorMessage() {

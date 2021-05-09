@@ -86,6 +86,11 @@ public abstract class AbstractFacade<T> {
         }
         return qry.getResultList();
     }
+    
+    public List<T> findByJpql(String jpql) {
+        TypedQuery<T> qry = getEntityManager().createQuery(jpql, entityClass);
+        return qry.getResultList();
+    }
 
     public T findFirstByJpql(String jpql, Map<String, Object> parameters) {
         try {
@@ -103,8 +108,6 @@ public abstract class AbstractFacade<T> {
                 } else {
                     Object pVal = (Object) m.getValue();
                     qry.setParameter(pPara, pVal);
-System.out.println("nnnnnnnnnnnnn -->"+pPara);
-System.out.println("nnnnnnnnnnnnn -->"+pVal);
                 }
             }
             

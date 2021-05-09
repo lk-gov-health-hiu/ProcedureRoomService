@@ -35,8 +35,6 @@ public class ProcedurePerClient implements Serializable {
     private Institute instituteId;
     @ManyToOne
     private ProcedurePerInstitute procedureId;
-    @ManyToOne
-    private Institute roomId;
     private String createdBy;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -107,7 +105,7 @@ public class ProcedurePerClient implements Serializable {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
-
+    
     public ProcedurePerInstitute getProcedureId() {
         return procedureId;
     }
@@ -122,14 +120,5 @@ public class ProcedurePerClient implements Serializable {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public Institute getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(Institute roomId) {
-        this.roomId = roomId;
-    }
-
+    } 
 }

@@ -40,6 +40,8 @@ public class Institute implements Serializable {
     private String intituteType;
     private String name;
     private String hin;
+    private double latitude;
+    private double longitude;
     private String address;
     private String provinceId;
     private String districtId;
@@ -57,16 +59,19 @@ public class Institute implements Serializable {
     }
 
     public Institute getObject(JSONObject jo_) {
-        this.setId(jo_.containsKey("id") ? Long.parseLong(jo_.get("id").toString()) : null);
-        this.setCode(jo_.containsKey("institute_id") ? jo_.get("institute_id").toString() : null);
-        this.setIntituteTypeDb(jo_.containsKey("institute_type_db") ? jo_.get("institute_type_db").toString() : null);
-        this.setIntituteType(jo_.containsKey("institute_type") ? jo_.get("institute_type").toString() : null);
+        this.setId(jo_.containsKey("institute_id") ? Long.parseLong(jo_.get("institute_id").toString()) : null);
+        this.setCode(jo_.containsKey("institute_code") ? jo_.get("institute_code").toString() : null);
+        this.setIntituteTypeDb(jo_.containsKey("type") ? jo_.get("type").toString() : null);
+        this.setIntituteType(jo_.containsKey("type_label") ? jo_.get("type_label").toString() : null);
         this.setName(jo_.containsKey("name") ? jo_.get("name").toString() : null);
         this.setHin(jo_.containsKey("hin") ? jo_.get("hin").toString() : null);
         this.setAddress(jo_.containsKey("address") ? jo_.get("address").toString() : null);
-        this.setProvinceId(jo_.containsKey("provinceId") ? jo_.get("provinceId").toString() : null);
-        this.setDistrictId(jo_.containsKey("districtId") ? jo_.get("districtId").toString() : null);
-        this.setChildInstitutes(jo_.containsKey("child_ins_list") ? jo_.get("child_ins_list").toString() : null);
+//        System.out.println("22222222222 -->"+jo_.get("latitude"));
+//        this.setLatitude(jo_.containsKey("latitude")?(Double)jo_.get("latitude"):null);
+//        this.setLongitude(jo_.containsKey("longitude")?(Double)jo_.get("longitude"):null);
+        this.setProvinceId(jo_.containsKey("province_id") ? jo_.get("province_id").toString() : null);
+        this.setDistrictId(jo_.containsKey("district_id") ? jo_.get("district_id").toString() : null);
+        this.setChildInstitutes(jo_.containsKey("child_institutions") ? jo_.get("child_institutions").toString() : null);
         this.setEditedAt(jo_.containsKey("edited_at") ? jo_.get("edited_at").toString() : new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").format(new Timestamp(System.currentTimeMillis())));
 
         return this;
@@ -102,7 +107,21 @@ public class Institute implements Serializable {
 
     @Override
     public String toString() {
-        return "lk.gov.health.procedureroomservice.Institute[ id=" + id + " ]";
+        String to = code + " " + name + " " + address + " " + hin + " ";
+        to += longitude + " " + longitude;
+        to += intituteTypeDb;
+        if (intituteTypeDb != null) {
+            to += intituteType;
+        }
+        if (provinceId != null) {
+            to += provinceId;
+        }
+        if (districtId != null) {
+            to += districtId;
+        }
+        to += editedAt;
+
+        return to;
     }
 
     public String getCode() {
@@ -184,7 +203,6 @@ public class Institute implements Serializable {
 //    public void setEditedAt(Date editedAt) {
 //        this.editedAt = editedAt;
 //    }
-
     public void setEditedAt(String editedAt) {
         DateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
         Date date;
@@ -193,7 +211,31 @@ public class Institute implements Serializable {
             Timestamp timeStampDate = new Timestamp(date.getTime());
             this.editedAt = timeStampDate;
         } catch (ParseException ex) {
-            Logger.getLogger(Institute.class.getName()).log(Level.SEVERE, null, ex);
+            DateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+            Date date2;
+            try {
+                date2 = formatter2.parse(editedAt);
+                Timestamp timeStampDate = new Timestamp(date2.getTime());
+                this.editedAt = timeStampDate;
+            } catch (ParseException ex2) {
+                Logger.getLogger(Institute.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

@@ -10,14 +10,15 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 import lk.gov.health.procedureroomservice.Institute;
-import lk.gov.health.procedureservice.serviceutils.CurrentHashFacade;
 import lk.gov.health.procedureservice.serviceutils.InstitutionFacade;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -31,9 +32,9 @@ import org.json.simple.parser.JSONParser;
 public class InstitutionCtrl implements Serializable {
     
     private Institute selected = new Institute();  
-    @EJB
-    private CurrentHashFacade currHash = new CurrentHashFacade(); 
-    
+    private ArrayList<Institute> items = new ArrayList<>();
+    List<Institute> institutes;
+        
     @EJB
     private InstitutionFacade insFacede = new InstitutionFacade();
     
@@ -60,9 +61,20 @@ public class InstitutionCtrl implements Serializable {
         }
     } 
     
-    public String getLocalHash(){
-        return currHash.Get_Current_Hash();
-    }   
+    private List<Institute> fillAllInstitutes() {
+        return insFacede.findByJpql("select i from Institute i order by i.name");
+    }
+    
+    public List<Institute> getInstitutions() {
+        if (institutes == null) {
+            institutes = fillAllInstitutes();
+        }
+        return institutes;
+    }
+    
+    public String getLocalInstitutionHash(){
+         return  DigestUtils.md5Hex(getInstitutions().toString()).toUpperCase();
+    }
     
     public Institute getSelected() {
         return selected;
@@ -70,16 +82,8 @@ public class InstitutionCtrl implements Serializable {
     
     public void setSelected(Institute selected) {
         this.selected = selected;
-    }    
-
-    public CurrentHashFacade getCurrHash() {
-        return currHash;
-    }
-
-    public void setCurrHash(CurrentHashFacade currHash) {
-        this.currHash = currHash;
-    }
-
+    } 
+    
     public InstitutionFacade getInsFacede() {
         return insFacede;
     }

@@ -150,4 +150,12 @@ public class ProcedureTypeFacadeREST extends AbstractFacade<ProcedureType> {
         jSONObjectOut.put("message", "Authorization issue, Please contact your system admin.");
         return jSONObjectOut;
     }
+
+    private boolean Is_Exists(String procedureType) {
+        Map m = new HashMap();
+        String jpql = "SELECT pt FROM ProcedureType pt WHERE procedureType = :searchVal";
+        m.put("searchVal", procedureType);
+
+        return super.findFirstByJpql(jpql, m) != null;
+    }
 }

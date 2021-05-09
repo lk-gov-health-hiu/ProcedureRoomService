@@ -8,7 +8,7 @@ package lk.gov.health.procedureservice.serviceutils;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import lk.gov.health.procedureroomservice.Institute;
+import lk.gov.health.procedureroomservice.ProcedurePerClient;
 import lk.gov.health.procedureroomservice.service.AbstractFacade;
 
 /**
@@ -16,17 +16,17 @@ import lk.gov.health.procedureroomservice.service.AbstractFacade;
  * @author user
  */
 @Stateless
-public class InstitutionFacade extends AbstractFacade<Institute>{
-
+public class ProcedurePerClientFacade extends AbstractFacade<ProcedurePerClient>{
+    
     @PersistenceContext(unitName = "hmisPU")
-    private EntityManager em;    
+    private EntityManager em;         
 
     @Override
     protected EntityManager getEntityManager() {
         return em;
     }
     
-    public InstitutionFacade() {
-        super(Institute.class);
-    } 
+    public ProcedurePerClientFacade() {
+        super(ProcedurePerClient.class);
+    }       
 }

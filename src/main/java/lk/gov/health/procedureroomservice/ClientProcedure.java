@@ -27,7 +27,7 @@ public class ClientProcedure implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String phn;
-    private String roomId;
+    private String instituteId;
     private String procedureCode;
     private String createdBy;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
@@ -73,15 +73,7 @@ public class ClientProcedure implements Serializable {
 
     public void setPhn(String phn) {
         this.phn = phn;
-    }    
-    
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
+    }  
 
     public String getProcedureCode() {
         return procedureCode;
@@ -114,4 +106,12 @@ public class ClientProcedure implements Serializable {
     public void setStatus(String status) {
         this.status = status;
     } 
+
+    public String getInstituteId() {
+        return instituteId;
+    }
+
+    public void setInstituteId(String instituteId) {
+        this.instituteId = instituteId;
+    }
 }

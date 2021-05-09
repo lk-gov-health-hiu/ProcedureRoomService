@@ -68,7 +68,7 @@ public abstract class AbstractFacade<T> {
         javax.persistence.Query q = getEntityManager().createQuery(cq);
         return ((Long) q.getSingleResult()).intValue();
     }
-    
+
     public List<T> findByJpql(String jpql, Map<String, Object> parameters) {
         TypedQuery<T> qry = getEntityManager().createQuery(jpql, entityClass);
         Set s = parameters.entrySet();
@@ -85,8 +85,43 @@ public abstract class AbstractFacade<T> {
             }
         }
         return qry.getResultList();
-    }  
+    }
     
+    public List<T> findByJpql(String jpql) {
+        TypedQuery<T> qry = getEntityManager().createQuery(jpql, entityClass);
+        return qry.getResultList();
+    }
+
+    public T findFirstByJpql(String jpql, Map<String, Object> parameters) {
+        try {
+            TypedQuery<T> qry = getEntityManager().createQuery(jpql, entityClass);
+            Set s = parameters.entrySet();
+            Iterator it = s.iterator();
+            qry.setMaxResults(1);
+            while (it.hasNext()) {
+                Map.Entry m = (Map.Entry) it.next();
+                String pPara = (String) m.getKey();
+                if (m.getValue() instanceof Date) {
+                    Date pVal = (Date) m.getValue();
+                    qry.setParameter(pPara, pVal, TemporalType.DATE);
+
+                } else {
+                    Object pVal = (Object) m.getValue();
+                    qry.setParameter(pPara, pVal);
+                }
+            }
+            
+            List<T> l = qry.getResultList();
+            if (l != null && l.isEmpty() == false) {
+                return l.get(0);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public T findByField(String fieldName, String fieldValue) {
         List<T> lstAll = findExact(fieldName, fieldValue);
         if (lstAll.isEmpty()) {
@@ -95,7 +130,7 @@ public abstract class AbstractFacade<T> {
             return lstAll.get(0);
         }
     }
-    
+
     public List<T> findExact(String fieldName, String fieldValue) {
         javax.persistence.criteria.CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
         javax.persistence.criteria.CriteriaQuery<T> cq = cb.createQuery(entityClass);

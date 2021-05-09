@@ -21,9 +21,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import lk.gov.health.procedureroomservice.Institute;
-import lk.gov.health.procedureroomservice.MedProcedure;
-import lk.gov.health.procedureroomservice.ProcedurePerInstitute;
-import lk.gov.health.procedureroomservice.ProcedureType;
+import lk.gov.health.procedureroomservice.ProcedureGroup;
+import lk.gov.health.procedureroomservice.ProcedureGroupPerInstitute;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -32,27 +31,28 @@ import org.json.simple.JSONObject;
  * @author user
  */
 @Stateless
-@Path("lk.gov.health.procedureroomservice.procedureperinstitute")
-public class ProcedurePerInstituteFacadeREST extends AbstractFacade<ProcedurePerInstitute> {
+@Path("lk.gov.health.procedureroomservice.proceduregroupperinstitute")
+public class ProcedureGroupPerInstituteFacadeREST extends AbstractFacade<ProcedureGroupPerInstitute> {
 
     @PersistenceContext(unitName = "hmisPU")
     private EntityManager em;
 
-    public ProcedurePerInstituteFacadeREST() {
-        super(ProcedurePerInstitute.class);
+    public ProcedureGroupPerInstituteFacadeREST() {
+        super(ProcedureGroupPerInstitute.class);
     }
 
     @POST
     @Override
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public void create(ProcedurePerInstitute entity) {
+    public void create(ProcedureGroupPerInstitute entity) {
+        entity.setId(null);
         super.create(entity);
     }
 
     @PUT
     @Path("{id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public void edit(@PathParam("id") Long id, ProcedurePerInstitute entity) {
+    public void edit(@PathParam("id") Long id, ProcedureGroupPerInstitute entity) {
         super.edit(entity);
     }
 
@@ -65,21 +65,21 @@ public class ProcedurePerInstituteFacadeREST extends AbstractFacade<ProcedurePer
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public ProcedurePerInstitute find(@PathParam("id") Long id) {
+    public ProcedureGroupPerInstitute find(@PathParam("id") Long id) {
         return super.find(id);
     }
 
     @GET
     @Override
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<ProcedurePerInstitute> findAll() {
+    public List<ProcedureGroupPerInstitute> findAll() {
         return super.findAll();
     }
 
     @GET
     @Path("{from}/{to}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<ProcedurePerInstitute> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
+    public List<ProcedureGroupPerInstitute> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
         return super.findRange(new int[]{from, to});
     }
 
@@ -96,34 +96,30 @@ public class ProcedurePerInstituteFacadeREST extends AbstractFacade<ProcedurePer
     }
 
     @GET
-    @Path("/filer_list/{instVal}/{searchVal}")
+    @Path("/proc_group_list/{instCode}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String findFilteredList(
-            @PathParam("searchVal") String searchVal,
-            @PathParam("instVal") String instVal) {
+    public String findFilteredList(@PathParam("instCode") String instCode) {
         JSONArray ja_ = new JSONArray();
-
         String jpql;
         Map m = new HashMap();
-        jpql = "SELECT pi FROM ProcedurePerInstitute pi WHERE pi.instituteId.code = :instVal AND upper(pi.procedure.procId) like :searchVal";
+        jpql = "SELECT pi FROM ProcedureGroupPerInstitute pi WHERE pi.institute.code = :instVal";
 
-        m.put("searchVal", "%" + searchVal.toUpperCase() + "%");
-        m.put("instVal", instVal);
+        m.put("instVal", instCode);
 
-        List<ProcedurePerInstitute> procPerInstList = super.findByJpql(jpql, m);
-        for (ProcedurePerInstitute proc : procPerInstList) {
+        List<ProcedureGroupPerInstitute> procGroupPerInstList = super.findByJpql(jpql, m);
+        procGroupPerInstList.forEach(proc -> {
             ja_.add(getJSONObject(proc));
-        }
+        });
         return ja_.toString();
     }
 
-    private JSONObject getJSONObject(ProcedurePerInstitute proc) {
+    private JSONObject getJSONObject(ProcedureGroupPerInstitute proc) {
         JSONObject jo_ = new JSONObject();
-
-        jo_.put("id", proc.getId());
-        jo_.put("procedure", this.getMedProcJSONObject(proc.getProcedure()));
-        jo_.put("institute", this.getInstitute(proc.getInstituteId()));
-
+        if (proc.getProcedureGroup().getId() != null && proc.getInstitute().getId() != null) {
+            jo_.put("id", proc.getId());
+            jo_.put("procGroup", this.getProcGroupJSONObject(proc.getProcedureGroup()));
+            jo_.put("institute", this.getInstitute(proc.getInstitute()));
+        }
         return jo_;
     }
 
@@ -141,40 +137,12 @@ public class ProcedurePerInstituteFacadeREST extends AbstractFacade<ProcedurePer
         return tempObj;
     }
 
-    private JSONObject getMedProcJSONObject(MedProcedure mp_) {
+    private JSONObject getProcGroupJSONObject(ProcedureGroup pg_) {
         JSONObject jo_ = new JSONObject();
-        jo_.put("id", mp_.getId());
-        jo_.put("comment", mp_.getComment());
-        jo_.put("procId", mp_.getProcId());
-        jo_.put("description", mp_.getDescription());
-        jo_.put("procType", getProcTypeObjct(mp_.getProcType()));
+        jo_.put("id", pg_.getId());
+        jo_.put("procGroup", pg_.getProcGroup());
+        jo_.put("description", pg_.getDescription());
         return jo_;
     }
 
-    public JSONObject getProcTypeObjct(ProcedureType obj) {
-        JSONObject tempObj = new JSONObject();
-        tempObj.put("id", obj.getId());
-        tempObj.put("procedureType", obj.getProcedureType());
-        tempObj.put("description", obj.getDescription());
-        return tempObj;
-    }
-
-    @GET
-    @Path("/procedure_list/{instCode}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String findFilteredList(@PathParam("instCode") String instCode){
-        JSONArray ja_ = new JSONArray();
-
-        String jpql;
-        Map m = new HashMap();
-        jpql = "SELECT pi FROM ProcedurePerInstitute pi WHERE pi.instituteId.code = :instVal";
-
-        m.put("instVal", instCode);
-
-        List<ProcedurePerInstitute> procPerInstList = super.findByJpql(jpql, m);
-        procPerInstList.forEach(proc -> {
-            ja_.add(getJSONObject(proc));
-        });
-        return ja_.toString();
-    }
 }

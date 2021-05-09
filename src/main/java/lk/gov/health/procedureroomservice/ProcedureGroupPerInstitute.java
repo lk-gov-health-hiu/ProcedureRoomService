@@ -7,14 +7,11 @@ package lk.gov.health.procedureroomservice;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.xml.bind.annotation.XmlRootElement;
-import lk.gov.health.procedureservice.enums.ObjectStatus;
 
 /**
  *
@@ -22,21 +19,17 @@ import lk.gov.health.procedureservice.enums.ObjectStatus;
  */
 @Entity
 @XmlRootElement
-public class ProcedureRoom implements Serializable {
+public class ProcedureGroupPerInstitute implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String roomId;
-    private String description;
     @ManyToOne
-    private ProcedureRoomType type;
+    private Institute institute;
     @ManyToOne
-    private Institute instituteId;
-    @Enumerated(EnumType.STRING)
-    private ObjectStatus status;  
-    
+    private ProcedureGroup procedureGroup;
+
     public Long getId() {
         return id;
     }
@@ -55,10 +48,10 @@ public class ProcedureRoom implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof ProcedureRoom)) {
+        if (!(object instanceof ProcedureGroupPerInstitute)) {
             return false;
         }
-        ProcedureRoom other = (ProcedureRoom) object;
+        ProcedureGroupPerInstitute other = (ProcedureGroupPerInstitute) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -67,47 +60,23 @@ public class ProcedureRoom implements Serializable {
 
     @Override
     public String toString() {
-        return "lk.gov.health.procedureroomservice.ProcedureRoom[ id=" + id + " ]";
+        return "lk.gov.health.procedureroomservice.ProcedureGroupPerInstitute[ id=" + id + " ]";
     }
 
-    public String getDescription() {
-        return description;
+    public Institute getInstitute() {
+        return institute;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setInstitute(Institute institute) {
+        this.institute = institute;
     }
 
-    public ProcedureRoomType getType() {
-        return type;
+    public ProcedureGroup getProcedureGroup() {
+        return procedureGroup;
     }
 
-    public void setType(ProcedureRoomType type) {
-        this.type = type;
-    }
-
-    public Institute getInstituteId() {
-        return instituteId;
-    }
-
-    public void setInstituteId(Institute instituteId) {
-        this.instituteId = instituteId;
-    }
-
-    public ObjectStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ObjectStatus status) {
-        this.status = status;
-    }
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
+    public void setProcedureGroup(ProcedureGroup procedureGroup) {
+        this.procedureGroup = procedureGroup;
     }
     
 }

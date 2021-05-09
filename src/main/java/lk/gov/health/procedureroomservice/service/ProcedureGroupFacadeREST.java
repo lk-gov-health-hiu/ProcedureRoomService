@@ -5,7 +5,9 @@
  */
 package lk.gov.health.procedureroomservice.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -41,7 +43,7 @@ public class ProcedureGroupFacadeREST extends AbstractFacade<ProcedureGroup> {
     @Override
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public void create(ProcedureGroup entity) {
-        entity.setId(null);  
+        entity.setId(null);
         super.create(entity);
     }
 
@@ -76,7 +78,7 @@ public class ProcedureGroupFacadeREST extends AbstractFacade<ProcedureGroup> {
         for (ProcedureGroup procType : procGroupList) {
             ja_.add(getJSONObject(procType));
         }
-        return ja_.toString(); 
+        return ja_.toString();
     }
 
     @GET
@@ -105,7 +107,27 @@ public class ProcedureGroupFacadeREST extends AbstractFacade<ProcedureGroup> {
     protected EntityManager getEntityManager() {
         return em;
     }
-    
+
+    @GET
+    @Path("/filer_list/{searchVal}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String findFilteredList(@PathParam("searchVal") String searchVal) {
+        JSONArray ja_ = new JSONArray();
+
+        String jpql;
+        Map m = new HashMap();
+        jpql = "SELECT pg FROM ProcedureGroup pg WHERE upper(pg.procGroup) like :searchVal";
+
+        m.put("searchVal", "%" + searchVal.toUpperCase() + "%");
+
+        List<ProcedureGroup> groupList = super.findByJpql(jpql, m);
+
+        for (ProcedureGroup mp_ : groupList) {
+            ja_.add(getJSONObject(mp_));
+        }
+        return ja_.toString();
+    }
+
     private JSONObject getJSONObject(ProcedureGroup procGroup) {
         JSONObject jo_ = new JSONObject();
 
@@ -114,5 +136,5 @@ public class ProcedureGroupFacadeREST extends AbstractFacade<ProcedureGroup> {
         jo_.put("description", procGroup.getDescription());
 
         return jo_;
-    }    
+    }
 }

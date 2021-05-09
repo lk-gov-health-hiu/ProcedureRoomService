@@ -25,7 +25,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import lk.gov.health.procedureroomservice.MedProcedure;
-import lk.gov.health.procedureroomservice.ProcedureRoomType;
 import lk.gov.health.procedureroomservice.ProcedureType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -119,20 +118,10 @@ public class MedProcedureFacadeREST extends AbstractFacade<MedProcedure> {
         jo_.put("comment", mp_.getComment());
         jo_.put("procId", mp_.getProcId());
         jo_.put("description", mp_.getDescription());
-        jo_.put("roomType", getRoomTypeObjct(mp_.getRoomType()));
         jo_.put("procType", getProcTypeObjct(mp_.getProcType()));
         jo_.put("status", mp_.getStatus().toString());
 
         return jo_;
-    }
-
-    public JSONObject getRoomTypeObjct(ProcedureRoomType obj) {
-        JSONObject tempObj = new JSONObject();
-        tempObj.put("id", obj.getId());
-        tempObj.put("typeId", obj.getTypeId());
-        tempObj.put("description", obj.getDescription());
-
-        return tempObj;
     }
 
     public JSONObject getProcTypeObjct(ProcedureType obj) {

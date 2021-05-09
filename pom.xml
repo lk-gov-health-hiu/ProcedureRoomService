@@ -5,7 +5,7 @@
     <artifactId>ProcedureRoomService</artifactId>
     <version>1.0</version>
     <packaging>war</packaging>
-    <name>ProcedureRoomService-1.0</name>
+    <name>ProcedureRoomService</name>
     
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -17,6 +17,12 @@
     </properties>
     
     <dependencies>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.11</version>
+            <type>jar</type>
+        </dependency>
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>

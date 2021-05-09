@@ -73,7 +73,7 @@ public class MedProcedureFacadeREST extends AbstractFacade<MedProcedure> {
         try {
             return mapper.writeValueAsString(super.find(id));
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(ProcedureLogFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MedProcedureFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

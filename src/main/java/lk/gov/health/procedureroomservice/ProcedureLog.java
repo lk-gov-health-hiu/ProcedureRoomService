@@ -28,10 +28,7 @@ public class ProcedureLog implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @ManyToOne
-    private ProcedurePerClient procPerClientId;
-    private String phn;
-    @ManyToOne
-    private Institute instituteId;
+    private ProcedurePerClient procPerClient;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date createdAt;
     private String activity;    
@@ -68,31 +65,7 @@ public class ProcedureLog implements Serializable {
     @Override
     public String toString() {
         return "lk.gov.health.procedureroomservice.ProcedureLog[ id=" + id + " ]";
-    }
-
-    public ProcedurePerClient getProcPerClientId() {
-        return procPerClientId;
-    }
-
-    public void setProcPerClientId(ProcedurePerClient procPerClientId) {
-        this.procPerClientId = procPerClientId;
-    }
-
-    public String getPhn() {
-        return phn;
-    }
-
-    public void setPhn(String phn) {
-        this.phn = phn;
-    }
-
-    public Institute getInstituteId() {
-        return instituteId;
-    }
-
-    public void setInstituteId(Institute instituteId) {
-        this.instituteId = instituteId;
-    }
+    }   
 
     public Date getCreatedAt() {
         return createdAt;
@@ -109,5 +82,12 @@ public class ProcedureLog implements Serializable {
     public void setActivity(String activity) {
         this.activity = activity;
     }
-    
+
+    public ProcedurePerClient getProcPerClient() {
+        return procPerClient;
+    }
+
+    public void setProcPerClient(ProcedurePerClient procPerClient) {
+        this.procPerClient = procPerClient;
+    }    
 }

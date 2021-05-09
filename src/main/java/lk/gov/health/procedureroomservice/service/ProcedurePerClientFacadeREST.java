@@ -70,7 +70,6 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public void register_procedure(ClientProcedure entity) {
         ProcedurePerClient entity_ = new ProcedurePerClient();
-        System.out.println("vvvvvvvvvvvvvvvvvvv -->" + entity.toString());
         entity_.setId(null);
         entity_.setPhn(entity.getPhn());
         entity_.setProcedureId(getProcedurePerInstitueObj(entity.getProcedureCode()));
@@ -78,7 +77,6 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         entity_.setCreatedBy(entity.getCreatedBy());
         entity_.setCreatedAt(new Date());
         entity_.setStatus(ProcPerClientStates.CREATED);
-        System.out.println("vvvvvvvvvvvvvvvvvvv 222222222222 -->" + entity_.toString());
         
         procedurePerClientCtrl.getProcClientFacade().create(entity_);
     }

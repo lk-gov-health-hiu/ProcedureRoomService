@@ -116,6 +116,37 @@ public class ProcedurePerInstituteFacadeREST extends AbstractFacade<ProcedurePer
         }
         return ja_.toString();
     }
+    
+    @GET
+    @Path("/procedure_per_inst_lov/{instVal}/{searchVal}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String findProcedurePerInstList(
+            @PathParam("searchVal") String searchVal,
+            @PathParam("instVal") String instVal) {
+        JSONArray ja_ = new JSONArray();
+
+        String jpql;
+        Map m = new HashMap();
+        jpql = "SELECT pi FROM ProcedurePerInstitute pi WHERE pi.instituteId.code = :instVal AND upper(pi.procedure.procId) like :searchVal";
+
+        m.put("searchVal", "%" + searchVal.toUpperCase() + "%");
+        m.put("instVal", instVal);
+
+        List<ProcedurePerInstitute> procPerInstList = super.findByJpql(jpql, m);
+        for (ProcedurePerInstitute proc : procPerInstList) {
+            ja_.add(getExtProcedureObj(proc));
+        }
+        return ja_.toString();
+    }
+    
+    public JSONObject getExtProcedureObj(ProcedurePerInstitute proc){
+        JSONObject jo_ = new JSONObject();
+        
+        jo_.put("procedureId", proc.getProcedure().getProcId());
+        jo_.put("description", proc.getProcedure().getDescription());
+        
+        return jo_;
+    }
 
     private JSONObject getJSONObject(ProcedurePerInstitute proc) {
         JSONObject jo_ = new JSONObject();

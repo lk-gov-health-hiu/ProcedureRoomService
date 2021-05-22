@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlRootElement;
+import lk.gov.health.procedureservice.enums.ProcPerClientStates;
 
 /**
  *
@@ -32,7 +33,7 @@ public class ClientProcedure implements Serializable {
     private String createdBy;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date createdAt;
-    private String status;
+    private ProcPerClientStates status;
 
     public Long getId() {
         return id;
@@ -97,15 +98,7 @@ public class ClientProcedure implements Serializable {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    } 
+    }    
 
     public String getInstituteId() {
         return instituteId;
@@ -113,5 +106,13 @@ public class ClientProcedure implements Serializable {
 
     public void setInstituteId(String instituteId) {
         this.instituteId = instituteId;
+    }
+
+    public ProcPerClientStates getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProcPerClientStates status) {
+        this.status = status;
     }
 }

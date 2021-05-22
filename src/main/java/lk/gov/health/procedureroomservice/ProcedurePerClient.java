@@ -6,6 +6,9 @@
 package lk.gov.health.procedureroomservice;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -17,6 +20,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlRootElement;
 import lk.gov.health.procedureservice.enums.ProcPerClientStates;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -30,17 +35,20 @@ public class ProcedurePerClient implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    private Long mainAppId;
     private String phn;
+    private String procedureId;
+    private String procedureCode;
+    private String procedureName;
+    private String clientName;
     @ManyToOne
-    private Institute instituteId;
-    @ManyToOne
-    private ProcedurePerInstitute procedureId;
+    private Institute instituteId;    
     private String createdBy;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date createdAt;
     @Enumerated(EnumType.STRING)
     private ProcPerClientStates status;
-
+    
     public Long getId() {
         return id;
     }
@@ -105,14 +113,6 @@ public class ProcedurePerClient implements Serializable {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
-    
-    public ProcedurePerInstitute getProcedureId() {
-        return procedureId;
-    }
-
-    public void setProcedureId(ProcedurePerInstitute procedureId) {
-        this.procedureId = procedureId;
-    }
 
     public String getCreatedBy() {
         return createdBy;
@@ -121,4 +121,44 @@ public class ProcedurePerClient implements Serializable {
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     } 
+
+    public Long getMainAppId() {
+        return mainAppId;
+    }
+
+    public void setMainAppId(Long mainAppId) {
+        this.mainAppId = mainAppId;
+    }
+
+    public String getProcedureId() {
+        return procedureId;
+    }
+
+    public void setProcedureId(String procedureId) {
+        this.procedureId = procedureId;
+    }
+
+    public String getProcedureCode() {
+        return procedureCode;
+    }
+
+    public void setProcedureCode(String procedureCode) {
+        this.procedureCode = procedureCode;
+    }
+
+    public String getProcedureName() {
+        return procedureName;
+    }
+
+    public void setProcedureName(String procedureName) {
+        this.procedureName = procedureName;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
+    }
 }

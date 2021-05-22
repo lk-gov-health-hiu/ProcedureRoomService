@@ -50,7 +50,9 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     }
 
     @Inject
-    InstitutionCtrl institutionCtrl;   
+    InstitutionCtrl institutionCtrl;
+    
+    String mainAppUrl = "http://localhost:8080/chimsd/data";
 
     @POST
     @Override
@@ -195,20 +197,20 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     public void Sync_Institutes() {
         if (!Is_Sync()) {
             ArrayList<Institute> items;
-            String mainAppUrl = "http://localhost:8080/chims/data?name=";
+            
             try {
                 Client client = Client.create();
-                WebResource webResource1 = client.resource(mainAppUrl + "get_institutes_list");
+                WebResource webResource1 = client.resource(mainAppUrl + "?name=get_institute_and_unit_list");
                 ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
                 String outpt = cr.getEntity(String.class);
                 JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);
                 items = institutionCtrl.getSelected().getObjectList((JSONArray) jo_.get("data"));
 
                 for (Institute inst : items) {
-                    if (inst.getCode() != null && !inst.getCode().equals("")) {
-                        if (isInstituteExists(inst.getCode())) {
+                    if (inst.getMainAppId() != null) {
+                        if (isInstituteExists(inst.getMainAppId())) {
                             if (checkInstChanged(inst)) {
-                                inst.setId(getInstitute(inst.getCode()).getId());
+                                inst.setId(getInstitute(inst.getMainAppId()).getId());
                                 institutionCtrl.getInsFacede().edit(inst);
                             }
                         } else {
@@ -223,34 +225,44 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     }
 
     public boolean checkInstChanged(Institute inst) {
-        return (getInstitute(inst.getCode()).getEditedAt() != inst.getEditedAt());
+        return (getInstitute(inst.getMainAppId()).getEditedAt() != inst.getEditedAt());
     }
 
-    public boolean isInstituteExists(String insCode) {
-        return getInstitute(insCode) != null;
-    }
-
-    public Institute getInstitute(String insCode) {
+    public boolean isInstituteExists(Long insCode) {
         HashMap<String, Object> p_ = new HashMap<>();
-        String jpql_ = "SELECT i FROM Institute i WHERE i.code = :insCode";
+        String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode";
         p_.put("insCode", insCode);
 
-        return super.findFirstByJpql(jpql_, p_);
+        return !super.findByJpql(jpql_, p_).isEmpty();
+    }
+
+    public Institute getInstitute(Long insCode) {
+        HashMap<String, Object> p_ = new HashMap<>();
+        String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode";
+        p_.put("insCode", insCode);
+
+        return super.findByJpql(jpql_, p_).get(0);
     }
 
     public boolean Is_Sync() {
-        return (institutionCtrl.getLocalInstitutionHash() != null && this.Get_Institute_Hash() != null) ? institutionCtrl.getLocalInstitutionHash().equals(this.Get_Institute_Hash()) : false;
+        System.out.println("aaaaaaaaaaaa -->"+Get_Institute_Hash());
+        System.out.println("bbbbbbbbbbbb -->"+institutionCtrl.getLocalInstitutionHash());
+        return Get_Institute_Hash().equals(institutionCtrl.getLocalInstitutionHash());
     }
 
     public String Get_Institute_Hash() {
         Client client = Client.create();
-        WebResource webResource1 = client.resource("http://localhost:8080/chims/data?name=get_institutes_list_hash");
+        WebResource webResource1 = client.resource(mainAppUrl+"?name=get_institutes_list_hash");
         ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
         String outpt = cr.getEntity(String.class);
         JSONObject jo_;
         try {
-            jo_ = (JSONObject) new JSONParser().parse(outpt);
-            return jo_.get("data").toString();           
+            if (outpt != null) {
+                jo_ = (JSONObject) new JSONParser().parse(outpt);
+                return jo_.get("data").toString();
+            } else {
+                return null;
+            }
         } catch (ParseException ex) {
             Logger.getLogger(InstituteFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -267,8 +279,8 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
 
     public boolean Is_Procedure_Room_Child(String insCode, Institute institute) {
         HashMap<String, Object> p_ = new HashMap<>();
-        String jpql_ = "SELECT i FROM Institute i WHERE i.code = :insCode AND i.childInstitutes LIKE '%" + institute.getCode() + "%'";
-        p_.put("insCode", insCode);
-        return super.findFirstByJpql(jpql_, p_) != null;
+        String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode AND i.childInstitutes LIKE '%" + institute.getCode() + "%'";
+        p_.put("insCode", Long.parseLong(insCode));
+        return !super.findByJpql(jpql_, p_).isEmpty();
     }
 }

@@ -159,4 +159,15 @@ public abstract class AbstractFacade<T> {
 
         return getEntityManager().createQuery(cq).getResultList();
     }
+    
+    public T findFirstByJpql(String jpql) {
+        TypedQuery<T> qry = getEntityManager().createQuery(jpql, entityClass);
+        qry.setMaxResults(1);
+        try {
+            return qry.getResultList().get(0);
+        } catch (Exception e) {
+
+            return null;
+        }
+    }
 }

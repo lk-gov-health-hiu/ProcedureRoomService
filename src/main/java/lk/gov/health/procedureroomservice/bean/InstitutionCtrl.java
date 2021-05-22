@@ -10,6 +10,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +42,7 @@ public class InstitutionCtrl implements Serializable {
     
     public void managedInstitutions() {
         ArrayList<Institute> items;
-        String mainAppUrl = "http://localhost:8080/chims/data?name=";
+        String mainAppUrl = "http://localhost:8080/chimsd/data?name=";
         try {
             Client client = Client.create();
             WebResource webResource1 = client.resource(mainAppUrl + "get_module_institutes_list");
@@ -59,10 +60,18 @@ public class InstitutionCtrl implements Serializable {
         } catch (org.json.simple.parser.ParseException ex) {
             Logger.getLogger(InstitutionCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
-    } 
+    }
     
     private List<Institute> fillAllInstitutes() {
         return insFacede.findByJpql("select i from Institute i order by i.name");
+    }
+    
+    public Institute getClientInstitute(Long insCode) {
+        HashMap<String, Object> p_ = new HashMap<>();
+        String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode";
+        p_.put("insCode", insCode);
+
+        return insFacede.findByJpql(jpql_, p_).get(0);
     }
     
     public List<Institute> getInstitutions() {

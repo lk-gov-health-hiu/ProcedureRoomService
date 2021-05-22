@@ -5,11 +5,18 @@
  */
 package lk.gov.health.procedureroomservice.service;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -29,10 +36,12 @@ import lk.gov.health.procedureroomservice.MedProcedure;
 import lk.gov.health.procedureroomservice.ProcedurePerClient;
 import lk.gov.health.procedureroomservice.ProcedurePerInstitute;
 import lk.gov.health.procedureroomservice.ProcedureType;
+import lk.gov.health.procedureroomservice.bean.InstitutionCtrl;
 import lk.gov.health.procedureroomservice.bean.ProcedurePerClientCtrl;
 import lk.gov.health.procedureservice.enums.ProcPerClientStates;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  *
@@ -40,7 +49,7 @@ import org.json.simple.JSONObject;
  */
 @Dependent
 @Path("lk.gov.health.procedureroomservice.procedureperclient")
-public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerClient> {   
+public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerClient> {
 
     @PersistenceContext(unitName = "hmisPU")
     private EntityManager em;
@@ -48,13 +57,17 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     public ProcedurePerClientFacadeREST() {
         super(ProcedurePerClient.class);
     }
-    
+
     @Inject
     private InstituteFacadeREST instituteFacadeREST;
     @Inject
     private ProcedurePerInstituteFacadeREST ProcedurePerInstituteFacadeREST;
     @Inject
     private ProcedurePerClientCtrl procedurePerClientCtrl;
+    @Inject
+    private InstitutionCtrl instituteCtrl;
+
+    String mainAppUrl = "https://chims.health.gov.lk/chimsd/data?name=";
 
     @POST
     @Override
@@ -72,12 +85,11 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         ProcedurePerClient entity_ = new ProcedurePerClient();
         entity_.setId(null);
         entity_.setPhn(entity.getPhn());
-        entity_.setProcedureId(getProcedurePerInstitueObj(entity.getProcedureCode()));
         entity_.setInstituteId(getProcedureInstituteObj(entity.getInstituteId()));
         entity_.setCreatedBy(entity.getCreatedBy());
         entity_.setCreatedAt(new Date());
         entity_.setStatus(ProcPerClientStates.CREATED);
-        
+
         procedurePerClientCtrl.getProcClientFacade().create(entity_);
     }
 
@@ -105,6 +117,21 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public void edit(@PathParam("id") Long id, ProcedurePerClient entity) {
         super.edit(entity);
+    }
+
+    @PUT
+    @Path("update_procedure/{id}")
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public void update_procedure(@PathParam("id") Long id, ClientProcedure entity) {
+        ProcedurePerClient entity_ = new ProcedurePerClient();
+        entity_.setId(id);
+        entity_.setPhn(entity.getPhn());
+        entity_.setInstituteId(getProcedureInstituteObj(entity.getInstituteId()));
+        entity_.setCreatedBy(entity.getCreatedBy());
+        entity_.setCreatedAt(entity.getCreatedAt());
+        entity_.setStatus(entity.getStatus());
+
+        procedurePerClientCtrl.getProcClientFacade().edit(entity_);
     }
 
     @DELETE
@@ -141,6 +168,8 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         JSONArray ja_ = new JSONArray();
         String jpql;
         Map m = new HashMap();
+
+        Sync_Procedures(instCode);
         jpql = "SELECT i FROM ProcedurePerClient i WHERE i.instituteId.code = :searchVal";
         m.put("searchVal", instCode);
 
@@ -181,15 +210,58 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         return em;
     }
 
+    private void Sync_Procedures(String instId) {
+        ArrayList<ProcedurePerClient> items;
+        try {
+            Client client = Client.create();
+            WebResource webResource1 = client.resource(mainAppUrl + "get_procedures_pending");
+            ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
+            String outpt = cr.getEntity(String.class);
+            JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);
+            items = getObjectList((JSONArray) jo_.get("data"));
+            
+            for(ProcedurePerClient item : items){
+                this.create(item);
+                
+                
+            }
+
+        } catch (org.json.simple.parser.ParseException ex) {
+            Logger.getLogger(InstitutionCtrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public ArrayList<ProcedurePerClient> getObjectList(JSONArray ja_) {
+        ArrayList<ProcedurePerClient> ObjectList = new ArrayList<>();
+
+        for (int i = 0; i < ja_.size(); i++) {
+            ObjectList.add(getObject((JSONObject) ja_.get(i)));
+        }
+        return ObjectList;
+    }
+    
+    public ProcedurePerClient getObject(JSONObject jo_) {
+        ProcedurePerClient procPerClient = new ProcedurePerClient();
+        procPerClient.setMainAppId(jo_.containsKey("procedure_request_id") ? Long.parseLong(jo_.get("procedure_request_id").toString()) : null);
+        procPerClient.setPhn(jo_.containsKey("client_phn") ? jo_.get("client_phn").toString() : null);
+        procPerClient.setProcedureId(jo_.containsKey("procedure_id") ? jo_.get("procedure_id").toString() : null);
+        procPerClient.setProcedureCode(jo_.containsKey("procedure_code") ? jo_.get("procedure_code").toString() : null);
+        procPerClient.setProcedureName(jo_.containsKey("procedure_name") ? jo_.get("procedure_name").toString() : null);
+        procPerClient.setClientName(jo_.containsKey("client_name") ? jo_.get("client_name").toString() : null);
+//        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
+        procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);        
+
+        return procPerClient;
+    }       
+
     private JSONObject getJSONObject(ProcedurePerClient procPerClient) {
         JSONObject jo_ = new JSONObject();
 
         jo_.put("id", procPerClient.getId());
         jo_.put("phn", procPerClient.getPhn());
         jo_.put("instituteId", getInstitute(procPerClient.getInstituteId()));
-        jo_.put("procedureId", getProPerInstJSONObject(procPerClient.getProcedureId()));
         jo_.put("createdBy", procPerClient.getCreatedBy());
-        jo_.put("createdAt", new SimpleDateFormat("yyyy-MM-dd").format(procPerClient.getCreatedAt()));
+        jo_.put("createdAt", procPerClient.getCreatedAt() != null ? new SimpleDateFormat("yyyy-MM-dd").format(procPerClient.getCreatedAt()) : new Date().toString());
         jo_.put("status", procPerClient.getStatus().toString());
 
         return jo_;

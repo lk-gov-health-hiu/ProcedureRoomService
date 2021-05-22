@@ -35,6 +35,7 @@ public class Institute implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    private Long mainAppId;
     private String code;
     private String intituteTypeDb;
     private String intituteType;
@@ -59,24 +60,23 @@ public class Institute implements Serializable {
     }
 
     public Institute getObject(JSONObject jo_) {
-        this.setId(jo_.containsKey("institute_id") ? Long.parseLong(jo_.get("institute_id").toString()) : null);
+        this.setMainAppId(jo_.containsKey("institute_id") ? Long.parseLong(jo_.get("institute_id").toString()) : null);
         this.setCode(jo_.containsKey("institute_code") ? jo_.get("institute_code").toString() : null);
         this.setIntituteTypeDb(jo_.containsKey("type") ? jo_.get("type").toString() : null);
         this.setIntituteType(jo_.containsKey("type_label") ? jo_.get("type_label").toString() : null);
         this.setName(jo_.containsKey("name") ? jo_.get("name").toString() : null);
         this.setHin(jo_.containsKey("hin") ? jo_.get("hin").toString() : null);
         this.setAddress(jo_.containsKey("address") ? jo_.get("address").toString() : null);
-//        System.out.println("22222222222 -->"+jo_.get("latitude"));
-//        this.setLatitude(jo_.containsKey("latitude")?(Double)jo_.get("latitude"):null);
-//        this.setLongitude(jo_.containsKey("longitude")?(Double)jo_.get("longitude"):null);
+        this.setLatitude(jo_.containsKey("latitude") ? Double.valueOf(jo_.get("latitude").toString()) : null);
+        this.setLongitude(jo_.containsKey("longitude") ? Double.valueOf(jo_.get("longitude").toString()) : null);
         this.setProvinceId(jo_.containsKey("province_id") ? jo_.get("province_id").toString() : null);
         this.setDistrictId(jo_.containsKey("district_id") ? jo_.get("district_id").toString() : null);
         this.setChildInstitutes(jo_.containsKey("child_institutions") ? jo_.get("child_institutions").toString() : null);
         this.setEditedAt(jo_.containsKey("edited_at") ? jo_.get("edited_at").toString() : new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").format(new Timestamp(System.currentTimeMillis())));
 
         return this;
-    }
-
+    }   
+    
     public Long getId() {
         return id;
     }
@@ -107,8 +107,11 @@ public class Institute implements Serializable {
 
     @Override
     public String toString() {
-        String to = code + " " + name + " " + address + " " + hin + " ";
-        to += longitude + " " + longitude;
+        
+        String to = mainAppId + " " + code + " " + name + " " + address + " " + hin + " ";
+        if (longitude != 0 && latitude != 0) {
+            to += longitude + " " + latitude;
+        }
         to += intituteTypeDb;
         if (intituteTypeDb != null) {
             to += intituteType;
@@ -120,7 +123,7 @@ public class Institute implements Serializable {
             to += districtId;
         }
         to += editedAt;
-
+        
         return to;
     }
 
@@ -237,5 +240,13 @@ public class Institute implements Serializable {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public Long getMainAppId() {
+        return mainAppId;
+    }
+
+    public void setMainAppId(Long mainAppId) {
+        this.mainAppId = mainAppId;
     }
 }

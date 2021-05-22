@@ -5,11 +5,10 @@
  */
 package lk.gov.health.procedureservice.serviceutils;
 
-import java.util.HashMap;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import lk.gov.health.procedureroomservice.Institute;
+import lk.gov.health.procedureroomservice.DataSync;
 import lk.gov.health.procedureroomservice.service.AbstractFacade;
 
 /**
@@ -17,8 +16,7 @@ import lk.gov.health.procedureroomservice.service.AbstractFacade;
  * @author user
  */
 @Stateless
-public class InstitutionFacade extends AbstractFacade<Institute>{
-
+public class DataSyncFacade extends AbstractFacade<DataSync> {
     @PersistenceContext(unitName = "hmisPU")
     private EntityManager em;    
 
@@ -27,7 +25,7 @@ public class InstitutionFacade extends AbstractFacade<Institute>{
         return em;
     }
     
-    public InstitutionFacade() {
-        super(Institute.class);
+    public DataSyncFacade() {
+        super(DataSync.class);
     } 
 }

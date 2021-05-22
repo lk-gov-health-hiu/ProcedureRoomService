@@ -67,7 +67,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     @Inject
     private InstitutionCtrl instituteCtrl;
 
-    String mainAppUrl = "https://chims.health.gov.lk/chimsd/data?name=";
+    String mainAppUrl = "https://localhost:8080/chimsd/data?name=";
 
     @POST
     @Override

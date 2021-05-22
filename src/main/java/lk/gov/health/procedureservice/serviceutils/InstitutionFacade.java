@@ -5,7 +5,6 @@
  */
 package lk.gov.health.procedureservice.serviceutils;
 
-import java.util.HashMap;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

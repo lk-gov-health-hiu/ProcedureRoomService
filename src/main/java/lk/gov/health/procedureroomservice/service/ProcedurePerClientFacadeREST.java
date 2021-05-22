@@ -8,7 +8,6 @@ package lk.gov.health.procedureroomservice.service;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -67,7 +66,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     @Inject
     private InstitutionCtrl instituteCtrl;
 
-    String mainAppUrl = "https://localhost:8080/chimsd/data?name=";
+    String mainAppUrl = "http://localhost:8080/chimsd/data?name=";
 
     @POST
     @Override

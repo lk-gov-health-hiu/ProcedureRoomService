@@ -61,7 +61,7 @@ public class UserManagementREST {
 //            }else{
 //                return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/pages/multiple_institute_procedures.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
 //            }
-            return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom/app/index.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
+            return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/index.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
         } else {
             return Response.status(Response.Status.CONFLICT).entity("Authorization issue, Please contact your system admin.").build();
         }

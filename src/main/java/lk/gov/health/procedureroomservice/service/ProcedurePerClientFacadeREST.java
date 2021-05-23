@@ -218,18 +218,18 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
             String outpt = cr.getEntity(String.class);
             JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);
             items = getObjectList((JSONArray) jo_.get("data"));
-            
-            for(ProcedurePerClient item : items){
+
+            for (ProcedurePerClient item : items) {
                 this.create(item);
-                
-                
+                WebResource webResource2 = client.resource(mainAppUrl + "mark_request_as_received=" + item.getMainAppId());
+                ClientResponse cr2 = webResource2.accept("application/json").get(ClientResponse.class);
             }
 
         } catch (org.json.simple.parser.ParseException ex) {
             Logger.getLogger(InstitutionCtrl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public ArrayList<ProcedurePerClient> getObjectList(JSONArray ja_) {
         ArrayList<ProcedurePerClient> ObjectList = new ArrayList<>();
 
@@ -238,7 +238,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         }
         return ObjectList;
     }
-    
+
     public ProcedurePerClient getObject(JSONObject jo_) {
         ProcedurePerClient procPerClient = new ProcedurePerClient();
         procPerClient.setMainAppId(jo_.containsKey("procedure_request_id") ? Long.parseLong(jo_.get("procedure_request_id").toString()) : null);
@@ -248,10 +248,10 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         procPerClient.setProcedureName(jo_.containsKey("procedure_name") ? jo_.get("procedure_name").toString() : null);
         procPerClient.setClientName(jo_.containsKey("client_name") ? jo_.get("client_name").toString() : null);
 //        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
-        procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);        
+        procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);
 
         return procPerClient;
-    }       
+    }
 
     private JSONObject getJSONObject(ProcedurePerClient procPerClient) {
         JSONObject jo_ = new JSONObject();

@@ -168,7 +168,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         String jpql;
         Map m = new HashMap();
         
-        Institute insObj = instituteFacadeREST.getInstitute(Long.parseLong(instCode));
+        Institute insObj = instituteFacadeREST.getInstitute(Long.valueOf(instCode));
 
         Sync_Procedures(insObj.getMainAppId().toString());
         jpql = "SELECT i FROM ProcedurePerClient i WHERE i.instituteId.code = :searchVal";

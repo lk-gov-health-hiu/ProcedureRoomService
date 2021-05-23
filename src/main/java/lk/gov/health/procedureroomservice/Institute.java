@@ -18,6 +18,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.json.simple.JSONArray;
@@ -46,7 +47,8 @@ public class Institute implements Serializable {
     private String address;
     private String provinceId;
     private String districtId;
-    private String childInstitutes;
+    @Lob
+    private String childrenInstitutes;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date editedAt;
 
@@ -71,7 +73,7 @@ public class Institute implements Serializable {
         this.setLongitude(jo_.containsKey("longitude") ? Double.valueOf(jo_.get("longitude").toString()) : null);
         this.setProvinceId(jo_.containsKey("province_id") ? jo_.get("province_id").toString() : null);
         this.setDistrictId(jo_.containsKey("district_id") ? jo_.get("district_id").toString() : null);
-        this.setChildInstitutes(jo_.containsKey("child_institutions") ? jo_.get("child_institutions").toString() : null);
+        this.setChildrenInstitutes(jo_.containsKey("child_institutions") ? jo_.get("child_institutions").toString() : null);
         this.setEditedAt(jo_.containsKey("edited_at") ? jo_.get("edited_at").toString() : new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").format(new Timestamp(System.currentTimeMillis())));
 
         return this;
@@ -191,12 +193,12 @@ public class Institute implements Serializable {
         this.intituteType = intituteType;
     }
 
-    public String getChildInstitutes() {
-        return childInstitutes;
+    public String getChildrenInstitutes() {
+        return childrenInstitutes;
     }
 
-    public void setChildInstitutes(String childInstitutes) {
-        this.childInstitutes = childInstitutes;
+    public void setChildrenInstitutes(String childrenInstitutes) {
+        this.childrenInstitutes = childrenInstitutes;
     }
 
     public Date getEditedAt() {

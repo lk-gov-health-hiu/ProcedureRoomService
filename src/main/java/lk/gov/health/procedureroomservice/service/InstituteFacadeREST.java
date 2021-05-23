@@ -163,7 +163,7 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
         jo_.put("address", institute.getAddress());
         jo_.put("provinceId", institute.getProvinceId());
         jo_.put("districtId", institute.getDistrictId());
-        jo_.put("childInstitutes", institute.getChildInstitutes());
+        jo_.put("childInstitutes", institute.getChildrenInstitutes());
         jo_.put("editedAt", institute.getEditedAt().toString());
 
         return jo_;
@@ -279,7 +279,7 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
 
     public boolean Is_Procedure_Room_Child(String insCode, Institute institute) {
         HashMap<String, Object> p_ = new HashMap<>();
-        String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode AND i.childInstitutes LIKE '%" + institute.getCode() + "%'";
+        String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode AND i.childrenInstitutes LIKE '%" + institute.getCode() + "%'";
         p_.put("insCode", Long.parseLong(insCode));
         return !super.findByJpql(jpql_, p_).isEmpty();
     }

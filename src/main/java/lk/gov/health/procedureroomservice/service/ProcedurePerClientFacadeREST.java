@@ -170,7 +170,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         
         Institute insObj = instituteFacadeREST.getInstitute(Long.parseLong(instCode));
 
-        Sync_Procedures(insObj.getCode());
+        Sync_Procedures(insObj.getMainAppId().toString());
         jpql = "SELECT i FROM ProcedurePerClient i WHERE i.instituteId.code = :searchVal";
         m.put("searchVal", instCode);
 

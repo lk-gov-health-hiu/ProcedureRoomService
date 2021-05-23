@@ -243,6 +243,14 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
 
         return super.findByJpql(jpql_, p_).get(0);
     }
+    
+    public Institute getInstituteById(Long insCode) {
+        HashMap<String, Object> p_ = new HashMap<>();
+        String jpql_ = "SELECT i FROM Institute i WHERE i.id = :insCode";
+        p_.put("insCode", insCode);
+
+        return super.findByJpql(jpql_, p_).get(0);
+    }
 
     public boolean Is_Sync() {
         System.out.println("aaaaaaaaaaaa -->"+Get_Institute_Hash());

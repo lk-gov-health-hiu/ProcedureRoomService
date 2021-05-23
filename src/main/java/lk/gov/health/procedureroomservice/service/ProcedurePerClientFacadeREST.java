@@ -110,7 +110,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
 
         return this.instituteFacadeREST.findByJpql(jpql_, m_).get(0);
     }
-    
+
     @PUT
     @Path("{id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -167,21 +167,21 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         JSONArray ja_ = new JSONArray();
         String jpql;
         Map m = new HashMap();
-        
-        Institute insObj = instituteFacadeREST.getInstitute(Long.valueOf(instCode));
+
+        Institute insObj = instituteFacadeREST.getInstituteById(Long.valueOf(instCode));
 
         Sync_Procedures(insObj.getMainAppId().toString());
-        jpql = "SELECT i FROM ProcedurePerClient i WHERE i.instituteId.code = :searchVal";
+        jpql = "SELECT i FROM ProcedurePerClient i";
         m.put("searchVal", instCode);
 
-        List<ProcedurePerClient> procList = super.findByJpql(jpql, m);
+        List<ProcedurePerClient> procList = super.findByJpql(jpql);
 
         for (ProcedurePerClient procPerClient : procList) {
             ja_.add(getJSONObject(procPerClient));
         }
         return ja_.toString();
     }
-
+    
     @GET
     @Path("{from}/{to}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -215,14 +215,14 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         ArrayList<ProcedurePerClient> items;
         try {
             Client client = Client.create();
-            WebResource webResource1 = client.resource(mainAppUrl + "get_procedures_pending$id="+instId);
+            WebResource webResource1 = client.resource(mainAppUrl + "get_procedures_pending");
             ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
             String outpt = cr.getEntity(String.class);
             JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);
             items = getObjectList((JSONArray) jo_.get("data"));
 
             for (ProcedurePerClient item : items) {
-                this.create(item);
+                procedurePerClientCtrl.getProcClientFacade().create(item);
                 WebResource webResource2 = client.resource(mainAppUrl + "mark_request_as_received=" + item.getMainAppId());
                 ClientResponse cr2 = webResource2.accept("application/json").get(ClientResponse.class);
             }
@@ -242,6 +242,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     }
 
     public ProcedurePerClient getObject(JSONObject jo_) {
+        System.out.println("222222222222 -->"+jo_.toString());
         ProcedurePerClient procPerClient = new ProcedurePerClient();
         procPerClient.setMainAppId(jo_.containsKey("procedure_request_id") ? Long.parseLong(jo_.get("procedure_request_id").toString()) : null);
         procPerClient.setPhn(jo_.containsKey("client_phn") ? jo_.get("client_phn").toString() : null);
@@ -251,7 +252,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         procPerClient.setClientName(jo_.containsKey("client_name") ? jo_.get("client_name").toString() : null);
 //        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
         procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);
-
+        procPerClient.setCreatedAt(new Date());
         return procPerClient;
     }
 
@@ -260,10 +261,10 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
 
         jo_.put("id", procPerClient.getId());
         jo_.put("phn", procPerClient.getPhn());
-        jo_.put("instituteId", getInstitute(procPerClient.getInstituteId()));
+//        jo_.put("instituteId", getInstitute(procPerClient.getInstituteId()));
         jo_.put("createdBy", procPerClient.getCreatedBy());
         jo_.put("createdAt", procPerClient.getCreatedAt() != null ? new SimpleDateFormat("yyyy-MM-dd").format(procPerClient.getCreatedAt()) : new Date().toString());
-        jo_.put("status", procPerClient.getStatus().toString());
+//        jo_.put("status", procPerClient.getStatus().toString());
 
         return jo_;
     }

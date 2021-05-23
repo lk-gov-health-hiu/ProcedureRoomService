@@ -110,7 +110,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
 
         return this.instituteFacadeREST.findByJpql(jpql_, m_).get(0);
     }
-
+    
     @PUT
     @Path("{id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -167,8 +167,10 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         JSONArray ja_ = new JSONArray();
         String jpql;
         Map m = new HashMap();
+        
+        Institute insObj = instituteFacadeREST.getInstitute(Long.parseLong(instCode));
 
-        Sync_Procedures(instCode);
+        Sync_Procedures(insObj.getCode());
         jpql = "SELECT i FROM ProcedurePerClient i WHERE i.instituteId.code = :searchVal";
         m.put("searchVal", instCode);
 
@@ -213,7 +215,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         ArrayList<ProcedurePerClient> items;
         try {
             Client client = Client.create();
-            WebResource webResource1 = client.resource(mainAppUrl + "get_procedures_pending");
+            WebResource webResource1 = client.resource(mainAppUrl + "get_procedures_pending$id="+instId);
             ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
             String outpt = cr.getEntity(String.class);
             JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);

@@ -223,7 +223,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
 
             for (ProcedurePerClient item : items) {
                 procedurePerClientCtrl.getProcClientFacade().create(item);
-                WebResource webResource2 = client.resource(mainAppUrl + "mark_request_as_received=" + item.getMainAppId());
+                WebResource webResource2 = client.resource(mainAppUrl + "mark_request_as_received&id=" + item.getMainAppId());
                 ClientResponse cr2 = webResource2.accept("application/json").get(ClientResponse.class);
             }
 
@@ -253,6 +253,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
 //        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
         procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);
         procPerClient.setCreatedAt(new Date());
+        procPerClient.setStatus(ProcPerClientStates.CREATED);
         return procPerClient;
     }
 
@@ -261,10 +262,11 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
 
         jo_.put("id", procPerClient.getId());
         jo_.put("phn", procPerClient.getPhn());
-//        jo_.put("instituteId", getInstitute(procPerClient.getInstituteId()));
+        jo_.put("procedureName", procPerClient.getProcedureName());
+        jo_.put("clientName", procPerClient.getClientName());
         jo_.put("createdBy", procPerClient.getCreatedBy());
         jo_.put("createdAt", procPerClient.getCreatedAt() != null ? new SimpleDateFormat("yyyy-MM-dd").format(procPerClient.getCreatedAt()) : new Date().toString());
-//        jo_.put("status", procPerClient.getStatus().toString());
+        jo_.put("status", procPerClient.getStatus().toString());
 
         return jo_;
     }

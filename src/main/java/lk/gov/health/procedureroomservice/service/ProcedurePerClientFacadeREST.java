@@ -119,18 +119,17 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     }
 
     @PUT
-    @Path("update_procedure/{id}")
+    @Path("update_procedure/{id}/{newStatus}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public void update_procedure(@PathParam("id") Long id, ClientProcedure entity) {
-        ProcedurePerClient entity_ = new ProcedurePerClient();
-        entity_.setId(id);
-        entity_.setPhn(entity.getPhn());
-        entity_.setInstituteId(getProcedureInstituteObj(entity.getInstituteId()));
-        entity_.setCreatedBy(entity.getCreatedBy());
-        entity_.setCreatedAt(entity.getCreatedAt());
-        entity_.setStatus(entity.getStatus());
-
+    public void update_procedure(@PathParam("id") Long id, @PathParam("newStatus") String newStatus) {
+        ProcPerClientStates procStatus = ProcPerClientStates.valueOf(newStatus);
+        ProcedurePerClient entity_ = procedurePerClientCtrl.getProcClientFacade().find(id);
+        entity_.setStatus(procStatus);   
         procedurePerClientCtrl.getProcClientFacade().edit(entity_);
+        
+        Client client = Client.create();
+        WebResource webResource1 = client.resource(mainAppUrl + "update_client_procedure/"+entity_.getMainAppId()+"/"+newStatus);
+        ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
     }
 
     @DELETE
@@ -181,7 +180,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         }
         return ja_.toString();
     }
-    
+
     @GET
     @Path("{from}/{to}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -236,13 +235,16 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         ArrayList<ProcedurePerClient> ObjectList = new ArrayList<>();
 
         for (int i = 0; i < ja_.size(); i++) {
-            ObjectList.add(getObject((JSONObject) ja_.get(i)));
+            JSONObject jo_ = (JSONObject) ja_.get(i);
+
+            if (jo_.containsKey("institute_id")) {
+                ObjectList.add(getObject(jo_));
+            }
         }
         return ObjectList;
     }
 
     public ProcedurePerClient getObject(JSONObject jo_) {
-        System.out.println("222222222222 -->"+jo_.toString());
         ProcedurePerClient procPerClient = new ProcedurePerClient();
         procPerClient.setMainAppId(jo_.containsKey("procedure_request_id") ? Long.parseLong(jo_.get("procedure_request_id").toString()) : null);
         procPerClient.setPhn(jo_.containsKey("client_phn") ? jo_.get("client_phn").toString() : null);
@@ -250,7 +252,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         procPerClient.setProcedureCode(jo_.containsKey("procedure_code") ? jo_.get("procedure_code").toString() : null);
         procPerClient.setProcedureName(jo_.containsKey("procedure_name") ? jo_.get("procedure_name").toString() : null);
         procPerClient.setClientName(jo_.containsKey("client_name") ? jo_.get("client_name").toString() : null);
-//        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
+        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
         procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);
         procPerClient.setCreatedAt(new Date());
         procPerClient.setStatus(ProcPerClientStates.CREATED);

@@ -52,7 +52,7 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     @Inject
     InstitutionCtrl institutionCtrl;
     
-    String mainAppUrl = "http://localhost:8080/chimsd/data";
+    String mainAppUrl = "http://localhost:8080/chims/data";
 
     @POST
     @Override

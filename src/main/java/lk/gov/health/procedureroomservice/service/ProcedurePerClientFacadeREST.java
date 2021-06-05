@@ -66,7 +66,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     @Inject
     private InstitutionCtrl instituteCtrl;
 
-    String mainAppUrl = "http://localhost:8080/chimsd/data?name=";
+    String mainAppUrl = "http://localhost:8080/chims/data?name=";
 
     @POST
     @Override
@@ -119,7 +119,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     }
 
     @PUT
-    @Path("update_procedure/{id}/{newStatus}")
+    @Path("/update_procedure/{id}/{newStatus}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public void update_procedure(@PathParam("id") Long id, @PathParam("newStatus") String newStatus) {
         ProcPerClientStates procStatus = ProcPerClientStates.valueOf(newStatus);
@@ -128,7 +128,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         procedurePerClientCtrl.getProcClientFacade().edit(entity_);
         
         Client client = Client.create();
-        WebResource webResource1 = client.resource(mainAppUrl + "update_client_procedure/"+entity_.getMainAppId()+"/"+newStatus);
+        WebResource webResource1 = client.resource( "http://localhost:8080/chims/data/update_client_procedure/"+entity_.getMainAppId().toString()+"/"+newStatus);
         ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
     }
 
@@ -170,11 +170,11 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         Institute insObj = instituteFacadeREST.getInstituteById(Long.valueOf(instCode));
 
         Sync_Procedures(insObj.getMainAppId().toString());
-        jpql = "SELECT i FROM ProcedurePerClient i";
-        m.put("searchVal", instCode);
+        jpql = "SELECT i FROM ProcedurePerClient i WHERE i.instituteId.id=:searchVal";
+        m.put("searchVal", Long.valueOf(instCode));
 
-        List<ProcedurePerClient> procList = super.findByJpql(jpql);
-
+        List<ProcedurePerClient> procList = super.findByJpql(jpql,m);
+        
         for (ProcedurePerClient procPerClient : procList) {
             ja_.add(getJSONObject(procPerClient));
         }
@@ -246,16 +246,20 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
 
     public ProcedurePerClient getObject(JSONObject jo_) {
         ProcedurePerClient procPerClient = new ProcedurePerClient();
-        procPerClient.setMainAppId(jo_.containsKey("procedure_request_id") ? Long.parseLong(jo_.get("procedure_request_id").toString()) : null);
-        procPerClient.setPhn(jo_.containsKey("client_phn") ? jo_.get("client_phn").toString() : null);
-        procPerClient.setProcedureId(jo_.containsKey("procedure_id") ? jo_.get("procedure_id").toString() : null);
-        procPerClient.setProcedureCode(jo_.containsKey("procedure_code") ? jo_.get("procedure_code").toString() : null);
-        procPerClient.setProcedureName(jo_.containsKey("procedure_name") ? jo_.get("procedure_name").toString() : null);
-        procPerClient.setClientName(jo_.containsKey("client_name") ? jo_.get("client_name").toString() : null);
-        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
-        procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);
-        procPerClient.setCreatedAt(new Date());
-        procPerClient.setStatus(ProcPerClientStates.CREATED);
+        if (jo_.containsKey("institute_id")) {
+
+            procPerClient.setMainAppId(jo_.containsKey("procedure_request_id") ? Long.parseLong(jo_.get("procedure_request_id").toString()) : null);
+            procPerClient.setPhn(jo_.containsKey("client_phn") ? jo_.get("client_phn").toString() : null);
+            procPerClient.setProcedureId(jo_.containsKey("procedure_id") ? jo_.get("procedure_id").toString() : null);
+            procPerClient.setProcedureCode(jo_.containsKey("procedure_code") ? jo_.get("procedure_code").toString() : null);
+            procPerClient.setProcedureName(jo_.containsKey("procedure_name") ? jo_.get("procedure_name").toString() : null);
+            procPerClient.setClientName(jo_.containsKey("client_name") ? jo_.get("client_name").toString() : null);
+            procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong((jo_.get("institute_id")).toString())) : null);
+            procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);
+            procPerClient.setCreatedAt(new Date());
+            procPerClient.setStatus(ProcPerClientStates.CREATED);
+
+        }
         return procPerClient;
     }
 

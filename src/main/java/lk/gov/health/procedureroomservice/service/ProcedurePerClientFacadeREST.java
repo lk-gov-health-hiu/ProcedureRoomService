@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -35,9 +36,9 @@ import lk.gov.health.procedureroomservice.MedProcedure;
 import lk.gov.health.procedureroomservice.ProcedurePerClient;
 import lk.gov.health.procedureroomservice.ProcedurePerInstitute;
 import lk.gov.health.procedureroomservice.ProcedureType;
-import lk.gov.health.procedureroomservice.bean.InstitutionCtrl;
 import lk.gov.health.procedureroomservice.bean.ProcedurePerClientCtrl;
 import lk.gov.health.procedureservice.enums.ProcPerClientStates;
+import lk.gov.health.procedureservice.serviceutils.InstitutionFacade;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -56,6 +57,9 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     public ProcedurePerClientFacadeREST() {
         super(ProcedurePerClient.class);
     }
+    
+    @EJB
+    private InstitutionFacade insFacede = new InstitutionFacade();
 
     @Inject
     private InstituteFacadeREST instituteFacadeREST;
@@ -63,10 +67,8 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
     private ProcedurePerInstituteFacadeREST ProcedurePerInstituteFacadeREST;
     @Inject
     private ProcedurePerClientCtrl procedurePerClientCtrl;
-    @Inject
-    private InstitutionCtrl instituteCtrl;
 
-    String mainAppUrl = "http://localhost:8080/chimsd/data?name=";
+    String mainAppUrl = "http://localhost:8080/chims/data?name=";
 
     @POST
     @Override
@@ -227,7 +229,7 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
             }
 
         } catch (org.json.simple.parser.ParseException ex) {
-            Logger.getLogger(InstitutionCtrl.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ProcedurePerClientFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -252,11 +254,19 @@ public class ProcedurePerClientFacadeREST extends AbstractFacade<ProcedurePerCli
         procPerClient.setProcedureCode(jo_.containsKey("procedure_code") ? jo_.get("procedure_code").toString() : null);
         procPerClient.setProcedureName(jo_.containsKey("procedure_name") ? jo_.get("procedure_name").toString() : null);
         procPerClient.setClientName(jo_.containsKey("client_name") ? jo_.get("client_name").toString() : null);
-        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? instituteCtrl.getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
+        procPerClient.setInstituteId(jo_.containsKey("institute_id") ? getClientInstitute(Long.parseLong(jo_.get(jo_.get("institute_id")).toString())) : null);
         procPerClient.setCreatedBy(jo_.containsKey("user_name") ? jo_.get("user_name").toString() : null);
         procPerClient.setCreatedAt(new Date());
         procPerClient.setStatus(ProcPerClientStates.CREATED);
         return procPerClient;
+    }
+    
+    public Institute getClientInstitute(Long insCode){
+        HashMap<String,Object> p_ = new HashMap<>();
+        String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode";
+        p_.put("insCode", insCode);
+        
+        return insFacede.findByJpql(jpql_, p_).get(0);
     }
 
     private JSONObject getJSONObject(ProcedurePerClient procPerClient) {

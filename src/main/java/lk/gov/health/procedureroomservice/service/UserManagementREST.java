@@ -23,7 +23,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lk.gov.health.procedureroomservice.Institute;
 import lk.gov.health.procedureroomservice.bean.DataSyncCtrl;
-import lk.gov.health.procedureroomservice.bean.InstitutionCtrl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -37,9 +36,7 @@ import org.json.simple.parser.ParseException;
 @Path("redirect")
 public class UserManagementREST {
     
-    String mainAppUrl = "http://localhost:8080/chimsd/data?name=";
-    @Inject
-    InstitutionCtrl institutionCtrl;
+    String mainAppUrl = "http://localhost:8080/chims/data?name=";
     @Inject
     DataSyncCtrl dataSyncCtrl;
 
@@ -54,48 +51,18 @@ public class UserManagementREST {
             @QueryParam("userInstitution") String institution) {
 
         if (apiKey != null && !apiKey.trim().equals("") && apiKey.trim().equals("EF16A5D4EF8AA6AA0580AF1390CF0600")) {
-//            if ((userRole.equals("System_Administrator") || userRole.equals("Institution_Administrator"))) {
-//                return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/index.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
-//            }else if(getProcedureRoomCount(insList)==0){
-//                return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/pages/single_institute_procedures.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
-//            }else{
-//                return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/pages/multiple_institute_procedures.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
-//            }
-            return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom/app/index.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
+            if ((userRole.equals("System_Administrator") || userRole.equals("Institution_Administrator"))) {
+                return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/index.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
+            }else if(getProcedureRoomCount(insList)==0){
+                return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/pages/single_institute_procedures.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
+            }else{
+                return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom_K/app/pages/multiple_institute_procedures.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
+            }
+//            return Response.status(Response.Status.ACCEPTED).entity("http://localhost:8080/ProcedureRoom/app/index.xhtml?UserId=" + userId + "&UserName=" + userName +"&UserRole=" + userRole + "&Proc_Rooms=" + insList + "&userInstitution=" + institution + "&API_KEY=" + apiKey).build();
         } else {
             return Response.status(Response.Status.CONFLICT).entity("Authorization issue, Please contact your system admin.").build();
         }
-    }
-    
-    public void Sync_Institutes() {
-        if (!Is_Sync()) {
-            ArrayList<Institute> items;
-            
-            try {
-                Client client = Client.create();
-                WebResource webResource1 = client.resource(mainAppUrl + "get_module_institute_list");
-                ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
-                String outpt = cr.getEntity(String.class);
-                JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);
-                items = institutionCtrl.getSelected().getObjectList((JSONArray) jo_.get("data"));
-
-                for (Institute inst : items) {
-                    if (inst.getMainAppId() != null) {
-//                        if (isInstituteExists(inst.getMainAppId())) {
-//                            if (checkInstChanged(inst)) {
-//                                inst.setId(getInstitute(inst.getMainAppId()).getId());
-//                                institutionCtrl.getInsFacede().edit(inst);
-//                            }
-//                        } else {
-//                            institutionCtrl.getInsFacede().create(inst);
-//                        }
-                    }
-                }
-            } catch (org.json.simple.parser.ParseException ex) {
-                Logger.getLogger(InstitutionCtrl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
+    }   
     
     public boolean Is_Sync() {
         if (!Get_Institute_Hash().equals(dataSyncCtrl.Get_Inst_Sync_Hash())) {
@@ -107,7 +74,7 @@ public class UserManagementREST {
     
     public String Get_Institute_Hash() {
         Client client = Client.create();
-        WebResource webResource1 = client.resource("http://localhost:8080/chimsd/data?name=get_institute_hash");
+        WebResource webResource1 = client.resource("http://localhost:8080/chims/data?name=get_institute_hash");
         ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
         String outpt = cr.getEntity(String.class);
         JSONObject jo_;

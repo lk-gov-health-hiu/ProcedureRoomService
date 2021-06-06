@@ -14,8 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.enterprise.context.Dependent;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
@@ -26,9 +31,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import lk.gov.health.procedureroomservice.Institute;
-import lk.gov.health.procedureroomservice.bean.InstitutionCtrl;
+import lk.gov.health.procedureservice.serviceutils.InstitutionFacade;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -44,16 +51,25 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
 
     @PersistenceContext(unitName = "hmisPU")
     private EntityManager em;
+    
+    @EJB
+    private InstitutionFacade insFacede = new InstitutionFacade();
+
+    private WebTarget webTarget;
+    private javax.ws.rs.client.Client client;
 
     public InstituteFacadeREST() {
         super(Institute.class);
     }
+    public List<Institute> instItems;
 
-    @Inject
-    InstitutionCtrl institutionCtrl;
-    
-    String mainAppUrl = "http://localhost:8080/chimsd/data";
+    Institute institute = new Institute();
 
+    @Resource(name = "baseAppUrlEnv")
+    private String baseAppUrlEnv;
+
+//    @Inject
+//    InstitutionCtrl institutionCtrl;
     @POST
     @Override
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -197,29 +213,30 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     public void Sync_Institutes() {
         if (!Is_Sync()) {
             ArrayList<Institute> items;
-            
+
             try {
-                Client client = Client.create();
-                WebResource webResource1 = client.resource(mainAppUrl + "?name=get_institute_and_unit_list");
-                ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
-                String outpt = cr.getEntity(String.class);
+                client = javax.ws.rs.client.ClientBuilder.newBuilder().sslContext(getSSLContext()).build();
+                webTarget = client.target(baseAppUrlEnv + "?name=get_institute_and_unit_list");
+
+                WebTarget resource = webTarget;
+                String outpt = resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(String.class);
                 JSONObject jo_ = (JSONObject) new JSONParser().parse(outpt);
-                items = institutionCtrl.getSelected().getObjectList((JSONArray) jo_.get("data"));
+                items = institute.getObjectList((JSONArray) jo_.get("data"));
 
                 for (Institute inst : items) {
                     if (inst.getMainAppId() != null) {
                         if (isInstituteExists(inst.getMainAppId())) {
                             if (checkInstChanged(inst)) {
                                 inst.setId(getInstitute(inst.getMainAppId()).getId());
-                                institutionCtrl.getInsFacede().edit(inst);
+                                insFacede.edit(inst);
                             }
                         } else {
-                            institutionCtrl.getInsFacede().create(inst);
+                            insFacede.create(inst);
                         }
                     }
                 }
             } catch (org.json.simple.parser.ParseException ex) {
-                Logger.getLogger(InstitutionCtrl.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(InstituteFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -243,7 +260,7 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
 
         return super.findByJpql(jpql_, p_).get(0);
     }
-    
+
     public Institute getInstituteById(Long insCode) {
         HashMap<String, Object> p_ = new HashMap<>();
         String jpql_ = "SELECT i FROM Institute i WHERE i.id = :insCode";
@@ -253,16 +270,14 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
     }
 
     public boolean Is_Sync() {
-        System.out.println("aaaaaaaaaaaa -->"+Get_Institute_Hash());
-        System.out.println("bbbbbbbbbbbb -->"+institutionCtrl.getLocalInstitutionHash());
-        return Get_Institute_Hash().equals(institutionCtrl.getLocalInstitutionHash());
+        return Get_Institute_Hash().equals(getLocalInstitutionHash());
     }
 
     public String Get_Institute_Hash() {
-        Client client = Client.create();
-        WebResource webResource1 = client.resource(mainAppUrl+"?name=get_institutes_list_hash");
-        ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
-        String outpt = cr.getEntity(String.class);
+        client = javax.ws.rs.client.ClientBuilder.newBuilder().sslContext(getSSLContext()).build();
+        webTarget = client.target(baseAppUrlEnv + "?name=get_institutes_list_hash");
+        WebTarget resource = webTarget;
+        String outpt = resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(String.class);
         JSONObject jo_;
         try {
             if (outpt != null) {
@@ -290,5 +305,55 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
         String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode AND i.childrenInstitutes LIKE '%" + institute.getCode() + "%'";
         p_.put("insCode", Long.parseLong(insCode));
         return !super.findByJpql(jpql_, p_).isEmpty();
+    }
+
+    private List<Institute> fillAllInstitutes() {
+        return super.findByJpql("select i from Institute i order by i.name");
+    }
+
+    public Institute getClientInstitute(Long insCode) {
+        HashMap<String, Object> p_ = new HashMap<>();
+        String jpql_ = "SELECT i FROM Institute i WHERE i.mainAppId = :insCode";
+        p_.put("insCode", insCode);
+
+        return super.findByJpql(jpql_, p_).get(0);
+    }
+
+    public List<Institute> getInstitutions() {
+        if (instItems == null) {
+            instItems = fillAllInstitutes();
+        }
+        return instItems;
+    }
+
+    public String getLocalInstitutionHash() {
+        return DigestUtils.md5Hex(getInstitutions().toString()).toUpperCase();
+    }
+
+    private SSLContext getSSLContext() {
+        // for alternative implementation checkout org.glassfish.jersey.SslConfigurator
+        javax.net.ssl.TrustManager x509 = new javax.net.ssl.X509TrustManager() {
+            @Override
+            public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws java.security.cert.CertificateException {
+                return;
+            }
+
+            @Override
+            public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws java.security.cert.CertificateException {
+                return;
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+        };
+        SSLContext ctx = null;
+        try {
+            ctx = SSLContext.getInstance("SSL");
+            ctx.init(null, new javax.net.ssl.TrustManager[]{x509}, null);
+        } catch (java.security.GeneralSecurityException ex) {
+        }
+        return ctx;
     }
 }

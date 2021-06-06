@@ -6,9 +6,6 @@
 package lk.gov.health.procedureroomservice;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -20,8 +17,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlRootElement;
 import lk.gov.health.procedureservice.enums.ProcPerClientStates;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 /**
  *

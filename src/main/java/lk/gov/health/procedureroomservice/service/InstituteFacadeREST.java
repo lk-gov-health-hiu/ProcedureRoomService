@@ -5,21 +5,15 @@
  */
 package lk.gov.health.procedureroomservice.service;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.enterprise.context.Dependent;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -129,6 +123,17 @@ public class InstituteFacadeREST extends AbstractFacade<Institute> {
                     ja_.add(getJSONObject(institute));
                 }
             }
+        }
+        return ja_.toString();
+    }
+    
+    @GET
+    @Path("/get_all_procedure_rooms")
+    @Produces({MediaType.APPLICATION_JSON})
+    public String getAllInstitutionsRooms() {
+        JSONArray ja_ = new JSONArray();
+        for (Institute ins_ : Get_Procedure_Rooms()) {
+            ja_.add(getJSONObject(ins_));
         }
         return ja_.toString();
     }

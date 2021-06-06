@@ -5,28 +5,16 @@
  */
 package lk.gov.health.procedureroomservice.service;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import lk.gov.health.procedureroomservice.Institute;
-import lk.gov.health.procedureroomservice.bean.DataSyncCtrl;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -35,10 +23,6 @@ import org.json.simple.parser.ParseException;
 @Stateless
 @Path("redirect")
 public class UserManagementREST {
-    
-    String mainAppUrl = "http://localhost:8080/chims/data?name=";
-    @Inject
-    DataSyncCtrl dataSyncCtrl;
 
     @GET
     @Produces({MediaType.TEXT_PLAIN})
@@ -62,34 +46,7 @@ public class UserManagementREST {
         } else {
             return Response.status(Response.Status.CONFLICT).entity("Authorization issue, Please contact your system admin.").build();
         }
-    }   
-    
-    public boolean Is_Sync() {
-        if (!Get_Institute_Hash().equals(dataSyncCtrl.Get_Inst_Sync_Hash())) {
-            dataSyncCtrl.manageHash("INSTITUTION", Get_Institute_Hash());
-            return false;
-        }
-        return true;
-    }
-    
-    public String Get_Institute_Hash() {
-        Client client = Client.create();
-        WebResource webResource1 = client.resource("http://localhost:8080/chims/data?name=get_institute_hash");
-        ClientResponse cr = webResource1.accept("application/json").get(ClientResponse.class);
-        String outpt = cr.getEntity(String.class);
-        JSONObject jo_;
-        try {
-            if (outpt != null) {
-                jo_ = (JSONObject) new JSONParser().parse(outpt);
-                return jo_.get("data").toString();
-            } else {
-                return null;
-            }
-        } catch (ParseException ex) {
-            Logger.getLogger(InstituteFacadeREST.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
+    } 
 
     public int getProcedureRoomCount(String procListStr) {
         Pattern pattern = Pattern.compile("[^A]*A");
